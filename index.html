@@ -1,0 +1,413 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <title>매일사주 — Daily Saju Premium</title>
+    <link rel="stylesheet" href="/src/style.css">
+  </head>
+  <body>
+    <div id="app" class="viewport">
+    
+    <!-- Background Music Player -->
+    <audio id="bg-music" loop autoplay muted playsinline>
+      <source src="/bg-music.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- Sound Bar Music Visualizer (top-center, fixed) -->
+    <button id="music-bar" class="music-bar" type="button" aria-label="Toggle Music">
+      <div class="music-bar-viz" id="music-viz">
+        <span class="bar" style="--delay:0.0s"></span>
+        <span class="bar" style="--delay:0.15s"></span>
+        <span class="bar" style="--delay:0.3s"></span>
+        <span class="bar" style="--delay:0.1s"></span>
+        <span class="bar" style="--delay:0.25s"></span>
+      </div>
+    </button>
+
+    <!-- Premium Language Toggle (EN / KO) -->
+    <button type="button" id="lang-toggle-btn" class="lang-toggle-btn" data-lang="en" aria-label="Toggle Language">
+      <span class="lang-opt lang-en">EN</span>
+      <span class="lang-opt lang-ko">KO</span>
+      <div class="lang-slider"></div>
+    </button>
+
+    <!-- 1. Entry Screen -->
+    <div id="entry-screen" class="screen view-active">
+      
+      <div class="pattern-bg" aria-hidden="true">
+        <svg class="pattern-svg" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
+          <defs>
+            <pattern id="dot-pattern" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+              <circle cx="2" cy="2" r="1.5" fill="rgba(255,255,255,0.03)" />
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#dot-pattern)" />
+        </svg>
+        <div class="pattern-vignette"></div>
+      </div>
+
+      <div class="entry-card card-enter" style="position: relative;">
+
+          <!-- Logo -->
+          <div class="logo-block" style="position: relative; display: flex; flex-direction: column; align-items: center; margin-top: 1.5rem;">
+            <div style="display: flex; align-items: center; justify-content: center;">
+              <img src="/icon-512.png" alt="Daily Saju Logo" style="width: 150px; height: auto; margin-bottom: 0; pointer-events: none;" />
+            </div>
+            <p class="logo-sub-text" id="ui-logo-subtitle" style="margin-top: 0;">DAILY SAJU RITUAL</p>
+          </div>
+
+          <!-- Saju description -->
+          <div class="saju-desc">
+            <p class="saju-desc-text" id="ui-description">
+              사주(四柱)는 태어난 연·월·일·시의 네 기둥으로<br>
+              당신의 타고난 기운과 오늘의 흐름을 읽는 동양의 지혜입니다.
+            </p>
+          </div>
+
+          <!-- Form -->
+          <form id="birth-form" class="form-body">
+
+            <!-- Name -->
+            <div class="field">
+              <label class="field-label" for="user-name" id="ui-label-name">Name</label>
+              <input type="text" id="user-name" class="text-input" autocomplete="name" placeholder="—" />
+            </div>
+
+            <!-- Date of Birth — equal-width columns -->
+            <div class="field">
+              <label class="field-label" id="ui-label-birth">Date of Birth</label>
+              <div class="date-row">
+                <select id="birth-year"  class="sel" required></select>
+                <select id="birth-month" class="sel" required></select>
+                <select id="birth-day"   class="sel" required></select>
+              </div>
+            </div>
+
+            <!-- Birth Time (Korean 12 Earthly Branches) — OPTIONAL -->
+            <div class="field">
+              <div class="field-label-row">
+                <label class="field-label" id="ui-label-time">Birth Time</label>
+                <span class="optional-badge" id="ui-optional">Optional</span>
+              </div>
+              <select id="birth-time" class="sel sel-full">
+                <!-- populated dynamically by JS per language -->
+              </select>
+              <p class="time-tip" id="ui-time-tip">✶ Knowing your birth hour enables a more precise reading of all Four Pillars.</p>
+            </div>
+
+            <!-- Gender — 3-way -->
+            <div class="field">
+              <label class="field-label" id="ui-label-gender">Gender</label>
+              <div class="gender-row gender-row-3">
+                <input type="radio" id="gender-male"   name="gender" value="male" checked>
+                <label for="gender-male"   class="gender-btn" id="ui-label-male">Male</label>
+                <input type="radio" id="gender-female" name="gender" value="female">
+                <label for="gender-female" class="gender-btn" id="ui-label-female">Female</label>
+                <input type="radio" id="gender-other"  name="gender" value="other">
+                <label for="gender-other"  class="gender-btn" id="ui-label-other">Other</label>
+              </div>
+            </div>
+
+            <!-- Email (for future premium) -->
+            <div class="field">
+              <div class="field-label-row">
+                <label class="field-label" for="user-email" id="ui-label-email">Email</label>
+                <span class="optional-badge" id="ui-optional-email">Optional</span>
+              </div>
+              <input type="email" id="user-email" class="text-input" autocomplete="email" placeholder="you@example.com" />
+              <p class="time-tip" id="ui-email-hint">for premium features</p>
+            </div>
+
+            <!-- Begin -->
+            <button type="submit" class="btn-begin" id="ui-btn-begin">
+              Begin
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M5 12h14M13 6l6 6-6 6"/>
+              </svg>
+            </button>
+
+          </form>
+
+        </div><!-- /entry-card -->
+
+      </div><!-- /entry-screen -->
+
+      <!-- =====================================
+           PAYWALL SCREEN (3-Day Trial Expired)
+           ===================================== -->
+      <div id="paywall-screen" class="screen view-hidden">
+        <div class="pattern-bg" aria-hidden="true">
+          <svg class="pattern-svg" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
+            <defs>
+              <pattern id="dot-pattern-pw" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+                <circle cx="2" cy="2" r="1.5" fill="rgba(255,255,255,0.03)" />
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#dot-pattern-pw)" />
+          </svg>
+        </div>
+
+        <div class="entry-card card-enter" style="text-align: center; position: relative;">
+          <!-- Top Back Button -->
+          <button type="button" id="ui-paywall-back-btn" style="position: absolute; top: 1rem; left: 1rem; background: none; border: none; color: var(--text-2); cursor: pointer; display: flex; align-items: center; gap: 0.3rem;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+            <span style="font-size: 0.85rem;">Back</span>
+          </button>
+          
+          <div class="lock-icon-container" style="margin-top: 1rem; margin-bottom: 1.5rem;">
+            <svg class="lock-icon" viewBox="0 0 24 24" fill="var(--gold)" width="48" height="48" style="opacity: 0.9;">
+              <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2m-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2m3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1z"/>
+            </svg>
+          </div>
+
+          <h2 class="paywall-title" id="ui-paywall-title" style="font-family: var(--font-serif); font-weight: 200; font-size: 1.3rem; margin-bottom: 0.8rem; color: var(--text-1);"></h2>
+          <p class="paywall-desc" id="ui-paywall-desc" style="font-size: 0.85rem; line-height: 1.6; color: var(--text-2); margin-bottom: 1.5rem;"></p>
+
+          <!-- View Sample Button -->
+          <button type="button" id="ui-view-sample-btn" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(195,163,67,0.3); border-radius: 20px; padding: 0.5rem 1rem; color: var(--gold); font-size: 0.8rem; margin-bottom: 2rem; cursor: pointer; transition: all 0.2s;">
+            🔮 View Premium Sample
+          </button>
+
+          <style>
+            .plan-card { transition: all 0.2s; }
+            .plan-card input { display: none; }
+            .plan-card.selected {
+              border-color: var(--gold) !important;
+              background: rgba(195,163,67,0.1) !important;
+            }
+            .plan-card.selected .plan-name { color: var(--gold) !important; }
+          </style>
+
+          <!-- Plan Options -->
+          <div class="plan-options" id="plan-options" style="display: flex; flex-direction: column; gap: 1rem; margin-bottom: 2rem;">
+            <!-- Standard Plan -->
+            <label class="plan-card" style="display: flex; align-items: center; justify-content: space-between; padding: 1rem; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.3); cursor: pointer; text-align: left;">
+              <input type="radio" name="plan" value="standard">
+              <div class="plan-info">
+                <div class="plan-name" style="font-size: 0.95rem; font-weight: 600; color: #fff; margin-bottom: 0.3rem;" id="ui-plan-standard-name">Standard Pass</div>
+                <div style="font-size: 0.75rem; color: var(--text-2);" id="ui-plan-standard-desc">Daily Saju + Basic Tojeong</div>
+              </div>
+              <div class="plan-price" style="text-align: right;">
+                <div style="font-size: 0.75rem; color: rgba(255,255,255,0.4); text-decoration: line-through;" id="ui-plan-standard-val">$4.99</div>
+                <div style="font-size: 1.1rem; color: var(--gold); font-weight: 700;" id="ui-plan-standard-price">$2.99</div>
+              </div>
+            </label>
+            <!-- Premium Plan -->
+            <label class="plan-card selected" style="display: flex; align-items: center; justify-content: space-between; padding: 1rem; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.3); cursor: pointer; text-align: left;">
+              <input type="radio" name="plan" value="premium" checked>
+              <div class="plan-info">
+                <div class="plan-name" style="font-size: 0.95rem; font-weight: 600; color: #fff; margin-bottom: 0.3rem;" id="ui-plan-premium-name">Premium Pass</div>
+                <div style="font-size: 0.75rem; color: var(--text-2);" id="ui-plan-premium-desc">Standard + 12-Month Guide</div>
+              </div>
+              <div class="plan-price" style="text-align: right;">
+                <div style="font-size: 0.75rem; color: rgba(255,255,255,0.4); text-decoration: line-through;" id="ui-plan-premium-val">$9.99</div>
+                <div style="font-size: 1.1rem; color: var(--gold); font-weight: 700;" id="ui-plan-premium-price">$4.99</div>
+              </div>
+            </label>
+          </div>
+          
+          <button type="button" id="ui-paywall-btn" class="btn-premium" style="display: block; padding: 1rem; border-radius: 12px; border: none; font-family: inherit; font-size: 0.95rem; cursor: pointer; width: 100%; background: linear-gradient(135deg, #d4af37 0%, #aa8c2c 100%); color: #000; font-weight: 600; letter-spacing: 0.05em; transition: transform 0.2s, background 0.2s; box-shadow: 0 4px 15px rgba(212, 175, 55, 0.2);">
+            Unlock Now
+          </button>
+          
+          <button type="button" id="ui-paywall-restore" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; margin-top: 1rem; font-size: 0.85rem; color: var(--text-2); cursor: pointer; padding: 0.9rem; width: 100%; transition: background 0.2s;">
+            Restore Purchase / I already paid
+          </button>
+        </div>
+      </div>
+
+      <!-- 4. Premium Sample Screen -->
+      <div id="sample-screen" class="screen" style="z-index: 110; display: none; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; width: 100%; max-width: 100vw; height: 100vh;">
+        <div class="result-card" style="position: relative; padding: 2.5rem 1.5rem 2rem; text-align: center; overflow: visible;">
+          <!-- Top Back Button -->
+          <button type="button" id="ui-sample-back-btn" style="position: absolute; top: 1rem; left: 1rem; background: none; border: none; color: var(--text-2); cursor: pointer; display: flex; align-items: center; gap: 0.3rem;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+            <span style="font-size: 0.85rem;">Back</span>
+          </button>
+          
+          <h2 id="ui-sample-title" style="font-family: var(--font-serif); font-weight: 200; font-size: 1.5rem; margin-bottom: 0.5rem; color: var(--gold);">
+            Premium Report
+          </h2>
+          <p id="ui-sample-desc" style="font-size: 0.85rem; color: var(--text-2); margin-bottom: 2rem;">
+            Preview of your detailed reading.
+          </p>
+
+          <div id="ui-sample-content" style="text-align: left; margin-bottom: 2rem; width: 100%; max-width: 100%;">
+            <!-- DYNAMICALLY INJECTED EXTENDED BLURRED SAMPLE -->
+          </div>
+
+          <button type="button" id="ui-close-sample-btn" class="btn-premium" style="display: block; padding: 1rem; border-radius: 12px; border: 1px solid var(--gold); background: rgba(255,255,255,0.05); color: var(--gold); font-family: inherit; font-size: 0.95rem; font-weight: 600; width: 100%; cursor: pointer;">
+            Close Preview
+          </button>
+        </div>
+      </div>
+
+      <!-- 2. Meditation Screen -->
+      <div id="meditation-screen" class="screen">
+
+        <!-- Floating ink particles -->
+        <div id="particles-bg" class="particles-bg" aria-hidden="true"></div>
+
+        <!-- Animated element motif background -->
+        <div class="motif-bg" id="bg-layer"></div>
+        <div id="motif-container"></div>
+
+        <!-- Result card -->
+        <div class="result-card">
+
+          <!-- ① Today's date -->
+          <div class="result-date-pill fade-hidden" id="result-date-pill">
+            <span id="result-date-text"></span>
+          </div>
+
+          <!-- ② Element tag (五行) -->
+          <div class="element-tag fade-hidden" id="element-tag">
+            <span class="element-hanja" id="element-hanja"></span>
+            <span class="element-name"  id="element-name"></span>
+          </div>
+
+          <!-- ③ Main Korean Word -->
+          <h2 id="hwadu-char" class="hwadu-char fade-hidden">고요함</h2>
+
+          <!-- ③.1 Romanization + TTS (English mode only) -->
+          <div id="hwadu-roman-row" style="display:none; align-items:center; justify-content:center; gap:0.7rem; margin-bottom:0.3rem;">
+            <span id="hwadu-romanization" style="font-size:1rem; color:rgba(255,255,255,0.55); letter-spacing:0.08em; font-style:italic;"></span>
+            <button id="btn-tts" type="button" aria-label="Pronounce" style="background:none; border:1px solid rgba(255,255,255,0.2); border-radius:50%; width:2rem; height:2rem; display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--gold); flex-shrink:0; transition:border-color 0.2s;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+            </button>
+          </div>
+
+          <!-- ③.5 Korean Word Explanation -->
+          <p class="hwadu-explanation fade-hidden" id="hwadu-explanation"></p>
+
+          <!-- ④ Romanised word title / Meaning -->
+          <p class="hwadu-meaning fade-hidden" id="hwadu-meaning"></p>
+
+          <!-- ⑤ Thin gold divider -->
+          <div class="hwadu-divider fade-hidden" id="hwadu-divider"></div>
+
+          <!-- ⑥ Hwadu description text -->
+          <p id="hwadu-text" class="hwadu-text fade-hidden"></p>
+
+          <!-- ⑦ Action card -->
+          <div class="action-card fade-hidden" id="action-card">
+            <h3 id="action-title">Daily Prescription</h3>
+            <p  id="action-text"></p>
+          </div>
+
+          <!-- ⑧ Fortune Tiles -->
+          <div class="fortune-tiles fade-hidden" id="fortune-tiles"></div>
+
+          <!-- ⑧.5 + ⑨ Compact bottom bar -->
+          <div class="bottom-bar fade-hidden" id="premium-time-card">
+
+            <!-- Premium locked row (Upgraded to 2-Tier Teaser Box) -->
+            <div id="premium-locked-view" class="prem-action-teaser" style="margin-top: 2rem; padding: 1.5rem; border: 1px solid rgba(200,168,79,0.3); border-radius: 16px; background: rgba(0,0,0,0.4); text-align: center;">
+              
+              <h3 style="font-family: var(--font-serif); color: var(--gold); font-size: 1.3rem; margin-bottom: 0.5rem; font-weight: 700;" id="ui-teaser-title">Unlock Your Full Destiny</h3>
+              <p style="font-family: var(--font-sans); font-size: 0.85rem; color: rgba(255,255,255,0.7); margin-bottom: 1.5rem; line-height: 1.5;" id="ui-teaser-desc">Choose a pass to reveal your deeper life flow, wealth, career, and relationships.</p>
+              
+              <div class="plan-options" style="display: flex; flex-direction: column; gap: 1rem; margin-bottom: 1.5rem;">
+                
+                <!-- Standard Plan Row -->
+                <label class="plan-card" style="display: flex; align-items: stretch; padding: 1.2rem 1rem; border-radius: 12px; cursor: pointer; text-align: left; position: relative;">
+                  <div style="display: flex; align-items: center; margin-right: 0.8rem;">
+                    <input type="radio" name="teaser_plan" value="standard" onclick="document.querySelectorAll('input[name=teaser_plan]').forEach(el=>el.closest('label').classList.remove('selected')); this.closest('label').classList.add('selected');">
+                  </div>
+                  
+                  <div class="plan-info" style="flex: 1; min-width: 0;">
+                    <div class="plan-name" style="font-family: var(--font-serif); font-size: 1.1rem; font-weight: 600; color: #fff; margin-bottom: 0.4rem; word-break: keep-all; line-height: 1.3;" id="ui-teaser-standard-name">Standard Pass</div>
+                    <div style="font-size: 0.8rem; color: var(--text-2); line-height: 1.4; word-break: keep-all;" id="ui-teaser-standard-desc">Daily Saju + Basic Tojeong</div>
+                  </div>
+                  
+                  <div class="plan-price" style="text-align: right; display: flex; flex-direction: column; align-items: flex-end; justify-content: center; margin-left: 0.5rem; flex-shrink: 0;">
+                    <div style="font-size: 0.8rem; color: rgba(255,255,255,0.4); text-decoration: line-through; margin-bottom: 0.1rem;" id="ui-teaser-standard-val">$4.99</div>
+                    <div style="font-size: 1.2rem; color: var(--gold); font-weight: 700; margin-bottom: 0.4rem;" id="ui-teaser-standard-price">$2.99</div>
+                    <button type="button" class="btn-ghost-small ui-sample-btn" data-type="standard" style="padding: 0.35rem 0.6rem; font-size: 0.75rem; font-family: var(--font-sans); border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.05); color: #fff; display: flex; align-items: center; gap: 0.2rem;">
+                      <span class="ui-sample-btn-txt">Sample</span>
+                    </button>
+                  </div>
+                </label>
+
+                <!-- Premium Plan Row -->
+                <label class="plan-card selected" style="display: flex; align-items: stretch; padding: 1.2rem 1rem; border-radius: 12px; cursor: pointer; text-align: left; position: relative;">
+                  <div style="display: flex; align-items: center; margin-right: 0.8rem;">
+                    <input type="radio" name="teaser_plan" value="premium" checked onclick="document.querySelectorAll('input[name=teaser_plan]').forEach(el=>el.closest('label').classList.remove('selected')); this.closest('label').classList.add('selected');">
+                  </div>
+                  
+                  <div class="plan-info" style="flex: 1; min-width: 0;">
+                    <div class="plan-name" style="font-family: var(--font-serif); font-size: 1.1rem; font-weight: 700; color: var(--gold); margin-bottom: 0.4rem; word-break: keep-all; line-height: 1.3;" id="ui-teaser-premium-name">Premium Pass</div>
+                    <div style="font-size: 0.8rem; color: var(--text-2); line-height: 1.4; word-break: keep-all;" id="ui-teaser-premium-desc">Standard + 12-Month Guide</div>
+                  </div>
+                  
+                  <div class="plan-price" style="text-align: right; display: flex; flex-direction: column; align-items: flex-end; justify-content: center; margin-left: 0.5rem; flex-shrink: 0;">
+                    <div style="font-size: 0.8rem; color: rgba(255,255,255,0.4); text-decoration: line-through; margin-bottom: 0.1rem;" id="ui-teaser-premium-val">$9.99</div>
+                    <div style="font-size: 1.2rem; color: var(--gold); font-weight: 700; margin-bottom: 0.4rem;" id="ui-teaser-premium-price">$4.99</div>
+                    <button type="button" class="btn-ghost-small ui-sample-btn" data-type="premium" style="padding: 0.35rem 0.6rem; font-size: 0.75rem; font-family: var(--font-sans); border-radius: 6px; border: 1px solid rgba(195,163,67,0.5); background: rgba(195,163,67,0.15); color: var(--gold); display: flex; align-items: center; gap: 0.2rem;">
+                      <span class="ui-sample-btn-txt">Sample</span>
+                    </button>
+                  </div>
+                </label>
+
+              </div>
+
+              <!-- Unlock Button -->
+              <button type="button" class="btn-begin" id="ui-teaser-unlock-btn" style="padding: 0.85rem 0; width: 100%; font-size: 0.95rem; font-weight: 700; margin-bottom: 1rem;">
+                Unlock Now
+              </button>
+            </div>
+
+            <!-- Premium unlocked row -->
+            <div class="prem-unlocked-row" id="premium-unlocked-view" style="display:none;">
+
+              <!-- Tab Navigation Bar -->
+              <div class="prem-tab-bar" id="prem-tab-bar" role="tablist" aria-label="Fortune categories"></div>
+
+              <!-- SVG Eastern Line Motif (animated on tab switch) -->
+              <div class="tab-motif-line" aria-hidden="true">
+                <svg viewBox="0 0 300 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path id="tab-motif-path" d="M0 10 Q30 2 60 10 Q90 18 120 10 Q150 2 180 10 Q210 18 240 10 Q270 2 300 10"
+                    stroke="rgba(200,168,79,0.5)" stroke-width="1.2" stroke-dasharray="400" stroke-dashoffset="400"/>
+                </svg>
+              </div>
+
+              <!-- Active Tab Content Panel -->
+              <div class="prem-tab-panel" id="prem-tab-panel" role="tabpanel"></div>
+
+              <!-- Time Disclaimer (shown when birth time was not set) -->
+              <div id="prem-time-disclaimer" style="display:none;"></div>
+
+            </div>
+
+            <!-- Divider -->
+            <div class="bottom-divider"></div>
+
+            <!-- Footer reset button -->
+            <button id="btn-reset" class="btn-ghost-small">↩ Start Over</button>
+
+          </div>
+
+        </div>
+
+        <!-- Floating Action Buttons (Top & Start Over) -->
+        <div class="fab-container fade-hidden" id="ui-fab-container">
+          <button type="button" class="fab-btn" id="ui-fab-top" aria-label="Scroll to top">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+          </button>
+          <button type="button" class="fab-btn btn-ghost-small" id="ui-fab-home" aria-label="Start Over" style="border-radius: 100px; padding: 0 1rem; width: auto; font-size: 0.8rem; color: rgba(255,255,255,0.9); font-weight: 600; letter-spacing: 0.03em;">
+            ↩ Start Over
+          </button>
+        </div>
+
+      </div>
+
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
