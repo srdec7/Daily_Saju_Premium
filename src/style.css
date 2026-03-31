@@ -1229,8 +1229,8 @@ body {
    PREMIUM LANGUAGE TOGGLE (EN/KO)
    ===================================== */
 .lang-toggle-btn {
-  position: absolute;
-  top: 1.2rem;
+  position: fixed;
+  top: calc(env(safe-area-inset-top) + 8px);
   right: 1.2rem;
   z-index: 1000;
   display: flex;
