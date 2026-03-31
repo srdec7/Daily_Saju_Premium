@@ -1069,6 +1069,7 @@ const App = {
     
     // Show target
     if (this.screens[target]) {
+      this.screens[target].scrollTop = 0;
       this.screens[target].classList.add('view-active');
     }
   },
