@@ -1003,10 +1003,9 @@ const App = {
       this.elements.genderGroup.forEach(inp => {
         inp.checked = (inp.value === storedGender);
       });
-      this.switchScreen('entry');
-    } else {
-      this.switchScreen('landing');
     }
+    
+    this.switchScreen('landing');
   },
 
   handleSaveUser() {
