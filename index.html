@@ -37,8 +37,37 @@
       <div class="lang-slider"></div>
     </button>
 
+    <!-- 0. Landing Screen -->
+    <div id="landing-screen" class="screen view-active">
+      <div class="landing-content">
+        <!-- Exact Same Logo Block -->
+        <div class="logo-block" style="position: relative; display: flex; flex-direction: column; align-items: center; margin-top: 1.5rem;">
+          <div style="display: flex; align-items: center; justify-content: center;">
+            <img src="/icon-512.png" alt="Daily Saju Logo" style="width: 150px; height: auto; margin-bottom: 0; pointer-events: none;" />
+          </div>
+          <p class="logo-sub-text" id="ui-landing-logo-sub" style="margin-top: 0;">DAILY SAJU RITUAL</p>
+        </div>
+        
+        <h1 class="landing-title" id="ui-landing-title">운명의 지도를 펼치다</h1>
+        
+        <div class="landing-intro-text">
+          <p id="ui-landing-saju">사주(四柱)는 태어난 연·월·일·시의 네 기둥으로, 세상에 첫 숨을 내쉰 순간 당신에게 깃든 고유한 우주의 에너지를 읽어내는 동양의 지혜입니다.</p>
+          <br>
+          <p id="ui-landing-tojeong">수백 년 동안 한국인들은 인생의 중요한 갈림길마다 토정비결의 지혜를 빌려 다가올 화를 피하고 복을 맞이해 왔습니다. 이제, 당신의 삶에 숨겨진 흐름과 운명의 나침반을 확인해 보세요.</p>
+        </div>
+
+        <!-- Enter -->
+        <button type="button" class="btn-begin btn-enter" id="ui-btn-enter">
+          입장하기
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M5 12h14M13 6l6 6-6 6"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
     <!-- 1. Entry Screen -->
-    <div id="entry-screen" class="screen view-active">
+    <div id="entry-screen" class="screen">
       
       <div class="pattern-bg" aria-hidden="true">
         <svg class="pattern-svg" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">

@@ -15,6 +15,7 @@ const App = {
   user: null as any,
   isPremium: false as boolean,
   screens: {
+    landing: document.getElementById('landing-screen') as HTMLElement,
     entry: document.getElementById('entry-screen') as HTMLElement,
     meditation: document.getElementById('meditation-screen') as HTMLElement,
     paywall: document.getElementById('paywall-screen') as HTMLElement,
@@ -31,6 +32,7 @@ const App = {
     genderGroup: document.querySelectorAll('input[name="gender"]') as NodeListOf<HTMLInputElement>,
     langToggleBtn: document.getElementById('lang-toggle-btn') as HTMLElement,
     btnReset: document.getElementById('btn-reset') as HTMLButtonElement,
+    btnEnter: document.getElementById('ui-btn-enter') as HTMLButtonElement,
     
     // UI targets for data binding
     bgLayer: document.getElementById('bg-layer') as HTMLElement,
@@ -162,6 +164,10 @@ const App = {
 
     this.elements.btnReset.addEventListener('click', () => {
       this.resetAndGoHome();
+    });
+
+    this.elements.btnEnter.addEventListener('click', () => {
+      this.switchScreen('entry');
     });
 
     // Paywall Plan Selection logic
@@ -414,8 +420,8 @@ const App = {
     const maleRadio = document.getElementById('gender-male') as HTMLInputElement;
     if(maleRadio) maleRadio.checked = true;
 
-    if (this.screens.entry) this.screens.entry.scrollTop = 0;
-    this.switchScreen('entry');
+    if (this.screens.landing) this.screens.landing.scrollTop = 0;
+    this.switchScreen('landing');
   },
 
   initMusicToggle() {
@@ -587,6 +593,11 @@ const App = {
     tx('ui-label-email',  ui.email);
     tx('ui-email-hint',   ui.emailHint);
     tx('ui-btn-begin',    ui.btnBegin);
+    tx('ui-btn-enter',    ui.btnEnter);
+    tx('ui-landing-title', ui.landingTitle);
+    tx('ui-landing-logo-sub', ui.logoSub);
+    el('ui-landing-saju', ui.landingSajuIntro);
+    el('ui-landing-tojeong', ui.landingTojeongIntro);
     if (this.elements.btnReset) this.elements.btnReset.textContent = ui.btnReset;
     const fabHome = document.getElementById('ui-fab-home');
     if (fabHome) fabHome.innerHTML = `↩ ${ui.btnReset}`;
@@ -992,9 +1003,10 @@ const App = {
       this.elements.genderGroup.forEach(inp => {
         inp.checked = (inp.value === storedGender);
       });
+      this.switchScreen('entry');
+    } else {
+      this.switchScreen('landing');
     }
-    
-    this.switchScreen('entry');
   },
 
   handleSaveUser() {
@@ -1049,8 +1061,9 @@ const App = {
     this.presentMeditation(dateStr, lang);
   },
 
-  switchScreen(target: 'entry' | 'meditation' | 'paywall') {
+  switchScreen(target: 'landing' | 'entry' | 'meditation' | 'paywall') {
     // Hide all
+    if (this.screens.landing) this.screens.landing.classList.remove('view-active');
     this.screens.entry.classList.remove('view-active');
     this.screens.meditation.classList.remove('view-active');
     if (this.screens.paywall) this.screens.paywall.classList.remove('view-active');

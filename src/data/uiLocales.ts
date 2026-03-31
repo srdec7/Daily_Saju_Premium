@@ -1,6 +1,10 @@
 // src/data/uiLocales.ts
 
 export type UILocales = {
+  landingTitle: string;
+  landingSajuIntro: string;
+  landingTojeongIntro: string;
+  btnEnter: string;
   logoSub: string;
   description: string;
   sajuDesc: string;
@@ -67,6 +71,10 @@ export type UILocales = {
 
 export const uiTranslations: Record<string, UILocales> = {
   ko: {
+    landingTitle: '운명의 지도를 펼치다',
+    landingSajuIntro: '사주(四柱)는 태어난 연·월·일·시의 네 기둥으로, 세상에 첫 숨을 내쉰 순간 당신에게 깃든 고유한 우주의 에너지를 읽어내는 동양의 지혜입니다.',
+    landingTojeongIntro: '수백 년 동안 한국인들은 인생의 중요한 갈림길마다 토정비결의 지혜를 빌려 다가올 화를 피하고 복을 맞이해 왔습니다. 이제, 당신의 삶에 숨겨진 흐름과 운명의 나침반을 확인해 보세요.',
+    btnEnter: '입장하기',
     logoSub: 'Daily Saju Ritual',
     description: '당신의 타고난 기운을 분석하여 오늘 하루를 위한 단 하나의 비책을 알려드립니다.',
     sajuDesc: '사주(四柱)는 태어난 연·월·일·시의 네 기둥으로\n당신의 타고난 기운과 오늘의 흐름을 읽는 동양의 지혜입니다.',
@@ -126,6 +134,10 @@ export const uiTranslations: Record<string, UILocales> = {
     btnCloseSample: '미리보기 닫기',
   },
   en: {
+    landingTitle: 'Unveil Your Map of Destiny',
+    landingSajuIntro: 'Saju (四柱), meaning "Four Pillars," is the ancient Eastern art of reading the unique cosmic energy imbued within you at the exact moment of your birth.',
+    landingTojeongIntro: 'For centuries, Koreans have turned to the profound wisdom of Tojeongbigyeol—a traditional divination secret—to navigate life\'s crossroads, avoid misfortune, and welcome prosperity. Now, it is time to unlock the hidden flow of your own life.',
+    btnEnter: 'Enter',
     logoSub: 'Daily Saju Ritual',
     description: 'Analyzing your innate energy to reveal a single guiding insight for your day.',
     sajuDesc: 'Saju (四柱) reads the four pillars of your birth—year, month, day, and hour—\nto reveal the energy woven into your destiny.',
