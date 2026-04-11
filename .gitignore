@@ -33,6 +33,7 @@ val_*.txt
 *.log
 *.txt
 !robots.txt
+!ads.txt
 # Vercel and build outputs
 .vercel
 dist

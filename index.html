@@ -9,6 +9,11 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <title>매일사주 — Daily Saju Premium</title>
+    
+    <!-- Google AdSense -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9532805733974957"
+     crossorigin="anonymous"></script>
+
     <link rel="stylesheet" href="/src/style.css">
   </head>
   <body>
@@ -41,22 +46,22 @@
     <div id="landing-screen" class="screen view-active">
       <div class="landing-content">
         <!-- Exact Same Logo Block -->
-        <div class="logo-block" style="position: relative; display: flex; flex-direction: column; align-items: center; margin-top: 3.5rem; margin-bottom: 2rem;">
+        <div class="logo-block" style="position: relative; display: flex; flex-direction: column; align-items: center; margin-top: 0.5rem; margin-bottom: 0.8rem;">
           <div style="display: flex; align-items: center; justify-content: center;">
-            <img src="/icon-512.png" alt="Daily Saju Logo" style="width: 170px; height: auto; margin-bottom: -0.2rem; pointer-events: none;" />
+            <img src="/icon-512.png" alt="Daily Saju Logo" style="width: 140px; height: auto; margin-bottom: -0.2rem; pointer-events: none;" />
           </div>
-          <p class="logo-sub-text" id="ui-landing-logo-sub" style="margin-top: 0; font-size: 0.75rem; letter-spacing: 0.3em; margin-bottom: 0;">DAILY SAJU RITUAL</p>
+          <p class="logo-sub-text" id="ui-landing-logo-sub" style="margin-top: 0; font-size: 0.70rem; letter-spacing: 0.25em; margin-bottom: 0;">DAILY SAJU RITUAL</p>
         </div>
         
-        <h1 class="landing-title" id="ui-landing-title">Decode Your Destiny</h1>
+        <h1 class="landing-title" id="ui-landing-title" style="margin-bottom: 0.8rem; font-size: 1.3rem;">Decode Your Destiny</h1>
         
-        <div class="landing-intro-text">
-          <p class="landing-saju-intro" id="ui-landing-saju">
-            The ancient practice of <b>Saju (Four Pillars of Destiny)</b> evaluates the cosmic energies present at your precise time of birth. It serves as a philosophical map, helping you understand your inherent potentials, hidden talents, and life’s core flow.
+        <div class="landing-intro-text" style="margin-bottom: 0.5rem; font-size: 0.9rem;">
+          <p class="landing-saju-intro" id="ui-landing-saju" style="text-align: center; word-break: keep-all; margin-bottom: 1rem;">
+            Saju (四柱), meaning "Four Pillars,"<br>is the ancient Eastern art<br>of reading the unique cosmic energy<br>within you at the moment of your birth.
           </p>
 
-          <p class="landing-saju-intro" id="ui-landing-tojeong">
-            For over 400 years, the Tojeongbigyeol has guided Koreans in harmonizing with universal shifts. Rather than fixed fortunes, it offers strategic foresight—allowing you to navigate the year with wisdom, avoiding pitfalls and embracing opportunities.
+          <p class="landing-saju-intro" id="ui-landing-tojeong" style="text-align: center; word-break: keep-all;">
+            For centuries, Koreans have turned<br>to the profound wisdom of Tojeongbigyeol<br>to navigate life's crossroads,<br>avoid misfortune, and welcome prosperity.<br><br>Now, it is time<br>to unlock the hidden flow of your own life.
           </p>
           
           <div class="landing-scroll-space"></div>
@@ -149,15 +154,6 @@
               </div>
             </div>
 
-            <!-- Email (for future premium) -->
-            <div class="field">
-              <div class="field-label-row">
-                <label class="field-label" for="user-email" id="ui-label-email">Email</label>
-                <span class="optional-badge" id="ui-optional-email">Optional</span>
-              </div>
-              <input type="email" id="user-email" class="text-input" autocomplete="email" placeholder="you@example.com" />
-              <p class="time-tip" id="ui-email-hint">for premium features</p>
-            </div>
 
             <!-- Begin -->
             <button type="submit" class="btn-begin" id="ui-btn-begin">
@@ -342,59 +338,23 @@
           <!-- ⑧.5 + ⑨ Compact bottom bar -->
           <div class="bottom-bar fade-hidden" id="premium-time-card">
 
-            <!-- Premium locked row (Upgraded to 2-Tier Teaser Box) -->
+            <!-- Premium locked row (Hybrid: Watch Ad / $1.99 Remove Ads) -->
             <div id="premium-locked-view" class="prem-action-teaser" style="margin-top: 2rem; padding: 1.5rem; border: 1px solid rgba(200,168,79,0.3); border-radius: 16px; background: rgba(0,0,0,0.4); text-align: center;">
-              
+
               <h3 style="font-family: var(--font-serif); color: var(--gold); font-size: 1.3rem; margin-bottom: 0.5rem; font-weight: 700;" id="ui-teaser-title">Unlock Your Full Destiny</h3>
-              <p style="font-family: var(--font-sans); font-size: 0.85rem; color: rgba(255,255,255,0.7); margin-bottom: 1.5rem; line-height: 1.5;" id="ui-teaser-desc">Choose a pass to reveal your deeper life flow, wealth, career, and relationships.</p>
-              
-              <div class="plan-options" style="display: flex; flex-direction: column; gap: 1rem; margin-bottom: 1.5rem;">
-                
-                <!-- Standard Plan Row -->
-                <label class="plan-card" style="display: flex; align-items: stretch; padding: 1.2rem 1rem; border-radius: 12px; cursor: pointer; text-align: left; position: relative;">
-                  <div style="display: flex; align-items: center; margin-right: 0.8rem;">
-                    <input type="radio" name="teaser_plan" value="standard" onclick="document.querySelectorAll('input[name=teaser_plan]').forEach(el=>el.closest('label').classList.remove('selected')); this.closest('label').classList.add('selected');">
-                  </div>
-                  
-                  <div class="plan-info" style="flex: 1; min-width: 0;">
-                    <div class="plan-name" style="font-family: var(--font-serif); font-size: 1.1rem; font-weight: 600; color: #fff; margin-bottom: 0.4rem; word-break: keep-all; line-height: 1.3;" id="ui-teaser-standard-name">Standard Pass</div>
-                    <div style="font-size: 0.8rem; color: var(--text-2); line-height: 1.4; word-break: keep-all;" id="ui-teaser-standard-desc">Daily Saju + Basic Tojeong</div>
-                  </div>
-                  
-                  <div class="plan-price" style="text-align: right; display: flex; flex-direction: column; align-items: flex-end; justify-content: center; margin-left: 0.5rem; flex-shrink: 0;">
-                    <div style="font-size: 0.8rem; color: rgba(255,255,255,0.4); text-decoration: line-through; margin-bottom: 0.1rem;" id="ui-teaser-standard-val">$4.99</div>
-                    <div style="font-size: 1.2rem; color: var(--gold); font-weight: 700; margin-bottom: 0.4rem;" id="ui-teaser-standard-price">$2.99</div>
-                    <button type="button" class="btn-ghost-small ui-sample-btn" data-type="standard" style="padding: 0.35rem 0.6rem; font-size: 0.75rem; font-family: var(--font-sans); border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.05); color: #fff; display: flex; align-items: center; gap: 0.2rem;">
-                      <span class="ui-sample-btn-txt">Sample</span>
-                    </button>
-                  </div>
-                </label>
+              <p style="font-family: var(--font-sans); font-size: 0.85rem; color: rgba(255,255,255,0.7); margin-bottom: 1.5rem; line-height: 1.5;" id="ui-teaser-desc">Watch a short video ad to explore your wealth, career, and love flow deeply.</p>
 
-                <!-- Premium Plan Row -->
-                <label class="plan-card selected" style="display: flex; align-items: stretch; padding: 1.2rem 1rem; border-radius: 12px; cursor: pointer; text-align: left; position: relative;">
-                  <div style="display: flex; align-items: center; margin-right: 0.8rem;">
-                    <input type="radio" name="teaser_plan" value="premium" checked onclick="document.querySelectorAll('input[name=teaser_plan]').forEach(el=>el.closest('label').classList.remove('selected')); this.closest('label').classList.add('selected');">
-                  </div>
-                  
-                  <div class="plan-info" style="flex: 1; min-width: 0;">
-                    <div class="plan-name" style="font-family: var(--font-serif); font-size: 1.1rem; font-weight: 700; color: var(--gold); margin-bottom: 0.4rem; word-break: keep-all; line-height: 1.3;" id="ui-teaser-premium-name">Premium Pass</div>
-                    <div style="font-size: 0.8rem; color: var(--text-2); line-height: 1.4; word-break: keep-all;" id="ui-teaser-premium-desc">Standard + 12-Month Guide</div>
-                  </div>
-                  
-                  <div class="plan-price" style="text-align: right; display: flex; flex-direction: column; align-items: flex-end; justify-content: center; margin-left: 0.5rem; flex-shrink: 0;">
-                    <div style="font-size: 0.8rem; color: rgba(255,255,255,0.4); text-decoration: line-through; margin-bottom: 0.1rem;" id="ui-teaser-premium-val">$9.99</div>
-                    <div style="font-size: 1.2rem; color: var(--gold); font-weight: 700; margin-bottom: 0.4rem;" id="ui-teaser-premium-price">$4.99</div>
-                    <button type="button" class="btn-ghost-small ui-sample-btn" data-type="premium" style="padding: 0.35rem 0.6rem; font-size: 0.75rem; font-family: var(--font-sans); border-radius: 6px; border: 1px solid rgba(195,163,67,0.5); background: rgba(195,163,67,0.15); color: var(--gold); display: flex; align-items: center; gap: 0.2rem;">
-                      <span class="ui-sample-btn-txt">Sample</span>
-                    </button>
-                  </div>
-                </label>
+              <!-- Watch Ad Button -->
+              <button type="button" class="btn-begin" id="ui-btn-watch-ad" style="padding: 1rem 0; width: 100%; font-size: 1rem; font-weight: 700; margin-bottom: 1rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M8 5v14l11-7z"/>
+                </svg>
+                <span id="ui-btn-watch-ad-text">▶ Watch Ad to Unlock Reading</span>
+              </button>
 
-              </div>
-
-              <!-- Unlock Button -->
-              <button type="button" class="btn-begin" id="ui-teaser-unlock-btn" style="padding: 0.85rem 0; width: 100%; font-size: 0.95rem; font-weight: 700; margin-bottom: 1rem;">
-                Unlock Now
+              <!-- Remove Ads Button (IAP) -->
+              <button type="button" id="ui-btn-remove-ads" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(195,163,67,0.3); border-radius: 12px; font-size: 0.85rem; color: var(--gold); cursor: pointer; padding: 0.9rem; width: 100%; transition: background 0.2s;">
+                Remove Ads Forever ($1.99)
               </button>
             </div>
 
@@ -424,7 +384,7 @@
             <div class="bottom-divider"></div>
 
             <!-- Footer reset button -->
-            <button id="btn-reset" class="btn-ghost-small">↩ Start Over</button>
+            <button id="btn-reset" class="btn-begin" style="margin-top: 1rem; width: 100%; font-size: 1rem; padding: 1rem 0;">↩ New Reading</button>
 
           </div>
 
@@ -442,6 +402,23 @@
 
       </div>
 
+      <!-- Mock Ad Screen (with YouTube Shorts) -->
+      <div id="mock-ad-screen" class="screen view-hidden" style="z-index: 9999; background: #000; position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; overflow: hidden;">
+        
+        <!-- Background iframe preloaded to avoid iOS autoplay gesture dropping -->
+        <iframe 
+          id="mock-ad-iframe"
+          src="https://www.youtube.com/embed/NI1fGVggblY?enablejsapi=1&playsinline=1&loop=1&playlist=NI1fGVggblY&controls=0&modestbranding=1"
+          style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; z-index: 1;"
+          allow="autoplay; encrypted-media" 
+          allowfullscreen>
+        </iframe>
+
+        <!-- Hidden Foreground Content (Kept to prevent JS null errors) -->
+        <div style="display: none;">
+          <h3 id="ui-ad-playing">Playing Ad...</h3>
+        </div>
+      </div>
     </div>
     <script type="module" src="/src/main.ts"></script>
   </body>
