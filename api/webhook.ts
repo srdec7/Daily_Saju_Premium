@@ -72,19 +72,31 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // Get the email they entered at checkout or passed via metadata
     const customerEmail = session.customer_details?.email || session.metadata?.sajuPremiumEmail;
     const sajuUserId = session.metadata?.sajuUserId;
-    const sessionId = session.id;
     const plan = session.metadata?.sajuPlan || 'premium';
 
-    if (customerEmail && sajuUserId) {
+    if (customerEmail) {
       // Calculate 1 Year from now
       const endDate = new Date();
       endDate.setFullYear(endDate.getFullYear() + 1);
+      
+      let targetUserId = sajuUserId;
+      
+      // If no explicit user ID was passed, lookup existing user by Email or generate a new UUID
+      if (!targetUserId) {
+        const { data: existingUser } = await (supabaseAdmin as any)
+          .from('saju_users')
+          .select('id')
+          .eq('email', customerEmail)
+          .single();
+          
+        targetUserId = existingUser?.id || require('crypto').randomUUID();
+      }
 
       // Save purchase to Supabase (User Account-Based)
       const { error } = await (supabaseAdmin as any)
         .from('saju_users')
         .upsert({
-          id: sajuUserId,
+          id: targetUserId,
           email: customerEmail,
           plan: plan,
           subscription_end_date: endDate.toISOString()
@@ -94,9 +106,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         console.error("Error inserting into Supabase saju_users:", error);
         return res.status(500).json({ error: "Failed to allocate premium securely" });
       }
-      console.log(`Successfully unlocked premium for: ${customerEmail} (User ID: ${sajuUserId})`);
+      console.log(`Successfully unlocked premium for: ${customerEmail} (User ID: ${targetUserId})`);
     } else {
-      console.warn("No email or sajuUserId found in Stripe Checkout Session:", session.id);
+      console.warn("No customerEmail found in Stripe Checkout Session:", session.id);
     }
   }
 
