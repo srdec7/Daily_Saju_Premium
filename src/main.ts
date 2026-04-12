@@ -10,10 +10,14 @@ import { uiTranslations } from './data/uiLocales';
 import { injectMotif } from './motif';
 import { extendedHwadu } from './data/extendedHwadu';
 import { supabase } from './lib/supabase';
-
+import { Capacitor } from '@capacitor/core';
+import { App as CapApp } from '@capacitor/app';
+import { NativePurchases } from '@capgo/native-purchases';
+import { AdManager } from './adManager';
 const App = {
   user: null as any,
   isPremium: false as boolean,
+  isCurrentSessionUnlocked: false as boolean,
   screens: {
     landing: document.getElementById('landing-screen') as HTMLElement,
     entry: document.getElementById('entry-screen') as HTMLElement,
@@ -28,7 +32,7 @@ const App = {
     daySelect: document.getElementById('birth-day') as HTMLSelectElement,
     birthTimeSelect: document.getElementById('birth-time') as HTMLSelectElement,
     nameInput: document.getElementById('user-name') as HTMLInputElement,
-    emailInput: document.getElementById('user-email') as HTMLInputElement,
+    emailInput: document.getElementById('user-email') as HTMLInputElement | null,
     genderGroup: document.querySelectorAll('input[name="gender"]') as NodeListOf<HTMLInputElement>,
     langToggleBtn: document.getElementById('lang-toggle-btn') as HTMLElement,
     btnReset: document.getElementById('btn-reset') as HTMLButtonElement,
@@ -107,6 +111,22 @@ const App = {
     this.populateDateSelects();
     this.initMusicToggle();
     
+    // Global Back Button Logic
+    const backBtn = document.getElementById('global-back-btn');
+    if (backBtn) {
+      backBtn.addEventListener('click', () => {
+        if (this.screens.meditation.classList.contains('view-active')) {
+          this.switchScreen('entry');
+        } else if (this.screens.entry.classList.contains('view-active')) {
+          this.switchScreen('landing');
+        } else if (this.screens.sample && this.screens.sample.classList.contains('view-active')) {
+          this.switchScreen('landing');
+        } else if (this.screens.paywall && this.screens.paywall.classList.contains('view-active')) {
+          this.switchScreen('entry');
+        }
+      });
+    }
+    
     // Supabase Auth Integration
     supabase.auth.getSession().then(({ data: { session } }) => {
       this.user = session?.user ?? null;
@@ -116,12 +136,29 @@ const App = {
       this.checkStoredUser(); // Load state after auth is checked
     });
 
-    supabase.auth.onAuthStateChange((_event, session) => {
-      this.user = session?.user ?? null;
       if (this.user) {
         this.checkPremiumStatus(this.user.id);
       }
     });
+
+    // Native Back Button Handling (Android)
+    if (Capacitor.isNativePlatform()) {
+      CapApp.addListener('backButton', () => {
+        // Find whichever screen is active and go back
+        if (this.screens.meditation.classList.contains('view-active')) {
+          this.switchScreen('entry');
+        } else if (this.screens.entry.classList.contains('view-active')) {
+          this.switchScreen('landing');
+        } else if (this.screens.sample && this.screens.sample.classList.contains('view-active')) {
+          this.switchScreen('landing');
+        } else if (this.screens.paywall && this.screens.paywall.classList.contains('view-active')) {
+          this.switchScreen('entry');
+        } else {
+          // If on landing or any other state, exitapp
+          CapApp.exitApp();
+        }
+      });
+    }
 
     // Old restore logic replaced by Login Modal
     const restoreBtn = document.getElementById('ui-paywall-restore');
@@ -170,106 +207,152 @@ const App = {
       this.switchScreen('entry');
     });
 
-    // Paywall Plan Selection logic
-    const planCards = document.querySelectorAll('.plan-card');
-    planCards.forEach(card => {
-      card.addEventListener('click', () => {
-        planCards.forEach(c => c.classList.remove('selected'));
-        card.classList.add('selected');
-        const input = card.querySelector('input') as HTMLInputElement;
-        if (input) input.checked = true;
+    // ── Engine "데일리 사주란?" Popup Modal ─────────────────────────────
+    const enginePopupBtn = document.getElementById('ui-btn-engine-popup');
+    const engineModalOverlay = document.getElementById('engine-modal-overlay');
+    const engineModalContent = document.getElementById('engine-modal-content');
 
-        // Update buttons text dynamically based on selection
-        const lang = this.elements.langToggleBtn.getAttribute('data-lang') as LanguageCode || 'en';
-        const ui = uiTranslations[lang] || uiTranslations['en'];
-        const isPremium = input?.value === 'premium';
-        
-        const sampleBtn = document.getElementById('ui-view-sample-btn');
-        if (sampleBtn) sampleBtn.textContent = isPremium ? ui.btnViewSamplePremium : ui.btnViewSampleStandard;
+    const showEngineModal = () => {
+      if (!engineModalOverlay || !engineModalContent) return;
+      engineModalOverlay.style.display = 'flex';
+      void engineModalOverlay.offsetWidth; // force reflow so transition fires
+      engineModalOverlay.style.opacity = '1';
+      engineModalContent.style.transform = 'translateY(0)';
+    };
 
-        const paywallBtn = document.getElementById('ui-paywall-btn');
-        if (paywallBtn) paywallBtn.textContent = isPremium ? ui.paywallBtnPremium : ui.paywallBtnStandard;
+    const hideEngineModal = () => {
+      if (!engineModalOverlay || !engineModalContent) return;
+      engineModalOverlay.style.opacity = '0';
+      engineModalContent.style.transform = 'translateY(100%)';
+      setTimeout(() => { engineModalOverlay.style.display = 'none'; }, 320);
+    };
+
+    if (enginePopupBtn) enginePopupBtn.addEventListener('click', showEngineModal);
+
+    // Close when tapping the dim overlay background
+    if (engineModalOverlay) {
+      engineModalOverlay.addEventListener('click', (e) => {
+        if (e.target === engineModalOverlay) hideEngineModal();
       });
-    });
+    }
 
-    // Paywall Checkout Logic
-    const paywallBtn = document.getElementById('ui-paywall-btn');
-    if (paywallBtn) {
-      paywallBtn.addEventListener('click', async (e) => {
-        e.preventDefault();
-        const selectedPlan = document.querySelector('input[name="plan"]:checked') as HTMLInputElement;
-        const planValue = selectedPlan ? selectedPlan.value : 'premium';
+    // Mobile swipe-down to close
+    if (engineModalContent) {
+      let startY = 0;
+      let dragging = false;
+      engineModalContent.addEventListener('touchstart', (e) => {
+        startY = e.touches[0].clientY;
+        dragging = true;
+        engineModalContent.style.transition = 'none';
+      }, { passive: true });
+      engineModalContent.addEventListener('touchmove', (e) => {
+        if (!dragging) return;
+        const dy = e.touches[0].clientY - startY;
+        if (dy > 0) engineModalContent.style.transform = `translateY(${dy}px)`;
+      }, { passive: true });
+      engineModalContent.addEventListener('touchend', (e) => {
+        if (!dragging) return;
+        dragging = false;
+        engineModalContent.style.transition = 'transform 0.3s cubic-bezier(0.4,0,0.2,1)';
+        const dy = e.changedTouches[0].clientY - startY;
+        if (dy > 90) hideEngineModal();
+        else engineModalContent.style.transform = 'translateY(0)';
+      });
+    }
+
+    // Ad and IAP logic
+    const watchAdBtn = document.getElementById('ui-btn-watch-ad');
+    const removeAdsBtn = document.getElementById('ui-btn-remove-ads');
+    
+    if (watchAdBtn) {
+      watchAdBtn.addEventListener('click', async () => {
+        const success = await AdManager.getInstance().showRewardedVideo();
         
-        let proceedEmail = this.user?.email || localStorage.getItem('saju_user_email');
-        if (!proceedEmail) {
-          this.showLoginModal();
-          return;
+        if (success) {
+          this.isCurrentSessionUnlocked = true;
+          
+          const lockedView = document.getElementById('premium-locked-view');
+          const unlockedView = document.getElementById('premium-unlocked-view');
+          if (lockedView) lockedView.style.display = 'none';
+          if (unlockedView) unlockedView.style.display = 'block';
+          
+          const y = (document.getElementById('birth-year') as HTMLSelectElement).value;
+          const m = (document.getElementById('birth-month') as HTMLSelectElement).value;
+          const d = (document.getElementById('birth-day') as HTMLSelectElement).value;
+          const lang = this.elements.langToggleBtn.getAttribute('data-lang') as LanguageCode || 'en';
+          if (y && m && d) {
+             this.presentMeditation(`${y}-${m}-${d}`, lang);
+          }
+        }
+      });
+    }
+
+    if (removeAdsBtn) {
+      removeAdsBtn.addEventListener('click', async () => {
+        const textSpan = document.getElementById('ui-btn-remove-ads-text');
+        const originalText = textSpan ? textSpan.textContent : '1-Year Ad-Free Pass';
+        
+        // --- 1. NATIVE IAP FLOW (Store Apps) ---
+        if (Capacitor.isNativePlatform()) {
+          try {
+            if (textSpan) textSpan.textContent = 'Opening Store...';
+            removeAdsBtn.style.opacity = '0.7';
+
+            // Start the native purchase process
+            // NOTE: The productIdentifier 'com.dailysaju.premium' must match your store setup
+            const result = await NativePurchases.purchase({
+              productIdentifier: 'com.dailysaju.premium',
+            });
+
+            console.log('[NativeIAP] Purchase result:', result);
+            
+            // If we reach here without catch, it's generally successful
+            // Unlock locally
+            this.unlockPremiumLocally();
+            alert('Thank you! Premium access has been unlocked.');
+            
+            if (textSpan && originalText) textSpan.textContent = originalText;
+            removeAdsBtn.style.opacity = '1';
+
+          } catch (err: any) {
+            console.error('[NativeIAP] Error:', err);
+            // Check for cancellation vs error
+            if (err.message && (err.message.includes('cancel') || err.message.includes('user'))) {
+                console.log('[NativeIAP] User cancelled purchase');
+            } else {
+                alert('Purchase failed. Please ensure you have a valid payment method in your store account.');
+            }
+            if (textSpan && originalText) textSpan.textContent = originalText;
+            removeAdsBtn.style.opacity = '1';
+          }
+          return; // Exit, don't run Stripe flow
         }
 
-        const originalText = paywallBtn.textContent;
-        paywallBtn.textContent = 'Loading...';
-        paywallBtn.style.opacity = '0.7';
+        // --- 2. WEB STRIPE FLOW ---
+        const proceedEmail = this.user?.email || localStorage.getItem('saju_user_email') || '';
+        if (textSpan) textSpan.textContent = 'Processing...';
+        removeAdsBtn.style.opacity = '0.7';
 
         try {
           const lang = localStorage.getItem('saju_user_lang') || 'en';
           const res = await fetch('/api/create-checkout', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: proceedEmail.trim(), plan: planValue, lang, userId: this.user?.id })
+            body: JSON.stringify({ email: proceedEmail.trim(), plan: 'ad_free', lang, userId: this.user?.id })
           });
           const data = await res.json();
           if (data.url) {
             window.location.href = data.url;
           } else {
             alert('Failed to generate checkout link. Please try again.');
-            paywallBtn.textContent = originalText;
-            paywallBtn.style.opacity = '1';
-    }
-        } catch (err) {
-          console.error(err);
-          alert('Network error. Failed to connect to secure payment server.');
-          paywallBtn.textContent = originalText;
-          paywallBtn.style.opacity = '1';
-        }
-      });
-    }
-
-    // Teaser unlock button
-    const teaserUnlockBtn = document.getElementById('ui-teaser-unlock-btn');
-    if (teaserUnlockBtn) {
-      teaserUnlockBtn.addEventListener('click', async () => {
-        const planValue = document.querySelector('input[name="teaser_plan"]:checked') ? (document.querySelector('input[name="teaser_plan"]:checked') as HTMLInputElement).value : 'premium';
-        let proceedEmail = this.user?.email || localStorage.getItem('saju_user_email');
-        
-        if (!proceedEmail) {
-          this.showLoginModal();
-          return;
-        }
-
-        const originalText = teaserUnlockBtn.textContent;
-        teaserUnlockBtn.textContent = 'Loading...';
-        teaserUnlockBtn.style.opacity = '0.7';
-
-        try {
-          const lang = localStorage.getItem('saju_user_lang') || 'en';
-          const res = await fetch('/api/create-checkout', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: proceedEmail.trim(), plan: planValue, lang, userId: this.user?.id })
-          });
-          const data = await res.json();
-          if (data.url) {
-            window.location.href = data.url;
-          } else {
-            alert('Failed to generate checkout link. Please try again.');
-            teaserUnlockBtn.textContent = originalText;
-            teaserUnlockBtn.style.opacity = '1';
+            if (textSpan && originalText) textSpan.textContent = originalText;
+            removeAdsBtn.style.opacity = '1';
           }
         } catch (err) {
           console.error(err);
           alert('Network error. Failed to connect to secure payment server.');
-          teaserUnlockBtn.textContent = originalText;
-          teaserUnlockBtn.style.opacity = '1';
+          if (textSpan && originalText) textSpan.textContent = originalText;
+          removeAdsBtn.style.opacity = '1';
         }
       });
     }
@@ -394,6 +477,7 @@ const App = {
   },
 
   resetAndGoHome() {
+    this.isCurrentSessionUnlocked = false;
     localStorage.removeItem('saju_user_birth');
     localStorage.removeItem('saju_user_gender');
     localStorage.removeItem('saju_user_name');
@@ -411,7 +495,7 @@ const App = {
     
     // Clear visually
     this.elements.nameInput.value = '';
-    this.elements.emailInput.value = '';
+    if (this.elements.emailInput) this.elements.emailInput.value = '';
     this.elements.yearSelect.value = '';
     this.elements.monthSelect.value = '';
     this.elements.daySelect.value = '';
@@ -593,7 +677,8 @@ const App = {
     tx('ui-label-email',  ui.email);
     tx('ui-email-hint',   ui.emailHint);
     tx('ui-btn-begin',    ui.btnBegin);
-    tx('ui-btn-enter',    ui.btnEnter);
+    tx('ui-btn-enter-text', ui.btnEnter);
+    tx('ui-btn-engine-popup', ui.btnEnginePopup);
     tx('ui-landing-title', ui.landingTitle);
     tx('ui-landing-logo-sub', ui.logoSub);
     el('ui-landing-saju', ui.landingSajuIntro);
@@ -625,26 +710,31 @@ const App = {
     // Teaser elements
     tx('ui-teaser-title', ui.teaserTitle);
     tx('ui-teaser-desc', ui.teaserDesc);
-    tx('ui-teaser-unlock-btn', ui.teaserUnlockBtn);
-    tx('ui-teaser-standard-name', ui.planStandardName);
-    tx('ui-teaser-standard-desc', ui.planStandardDesc);
-    tx('ui-teaser-standard-val', ui.planStandardVal);
-    tx('ui-teaser-standard-price', ui.planStandardPrice);
-    tx('ui-teaser-premium-name', ui.planPremiumName);
-    tx('ui-teaser-premium-desc', ui.planPremiumDesc);
-    tx('ui-teaser-premium-price', ui.planPremiumPrice);
+    tx('ui-btn-watch-ad-text', ui.btnWatchAd || '▶ Watch Ad to Unlock');
+    tx('ui-btn-remove-ads-text', ui.btnRemoveAds || '1-Year Ad-Free Pass ($1.99)');
+    tx('ui-ad-playing', ui.adPlaying || 'Playing Ad...');
+    tx('ui-ad-desc', ui.adSimulatedDesc || 'This is a simulated video ad screen.');
+
+    // Engine Section
+    tx('ui-engine-title', ui.engineTitle);
+    el('ui-engine-desc1', ui.engineDesc1);
+    tx('ui-engine-item1-title', ui.engineItem1Title);
+    tx('ui-engine-item1-desc', ui.engineItem1Desc);
+    tx('ui-engine-item2-title', ui.engineItem2Title);
+    tx('ui-engine-item2-desc', ui.engineItem2Desc);
+    
+    // Teaser Feature List
+    tx('ui-teaser-list-title', ui.teaserListTitle);
+    tx('ui-t-f1', ui.tFeature1);
+    tx('ui-t-f2', ui.tFeature2);
+    tx('ui-t-f3', ui.tFeature3);
+    tx('ui-t-f4', ui.tFeature4);
+    tx('ui-t-f5', ui.tFeature5);
+    tx('ui-t-f6', ui.tFeature6);
+    tx('ui-t-f7', ui.tFeature7);
+    tx('ui-t-f8', ui.tFeature8);
     
     const langKey = lang === 'ko' ? 'ko' : 'en';
-    
-    // Sample Button Text (Iterating class bindings)
-    document.querySelectorAll('.ui-sample-btn-txt').forEach(el => {
-      el.textContent = langKey === 'ko' ? '샘플보기' : 'Sample';
-    });
-    
-    // Sample screen elements
-    tx('ui-sample-title', ui.sampleTitle);
-    tx('ui-sample-desc', ui.sampleDesc);
-    tx('ui-close-sample-btn', ui.btnCloseSample);
 
     // ── SAMPLE BUILD: uses the real saju engine with a fixed demo date ──────────
     // Fixed demo: 1990-03-06, Ilgan index 0 (甲-Wood). Good variety of content.
@@ -675,18 +765,18 @@ const App = {
 
       const L = {
         ko: {
-          totalFortune: '✦ 총운 — 올해의 큰 흐름', firstHalf: '✦ 상반기 흐름', secondHalf: '✦ 하반기 흐름',
-          wealth: '✦ 재물운', career: '✦ 직업/사업운', relations: '✦ 인간관계/대인운',
-          love: '✦ 연애/배우자운', family: '✦ 가족운', health: '✦ 건강/생활리듬',
-          caution: '✦ 조심해야 할 시기', strategy: '✦ 복을 키우는 행동 가이드', conclusion: '✦ 올해의 핵심 총평',
-          monthly: '✦ 월별 세운 (12개월)',
+          totalFortune: '✦ 2026년 총운 — 한 해의 큰 흐름', firstHalf: '✦ 2026년 상반기 흐름', secondHalf: '✦ 2026년 하반기 흐름',
+          wealth: '✦ 2026년 재물운', career: '✦ 2026년 직업/사업운', relations: '✦ 2026년 인간관계/대인운',
+          love: '✦ 2026년 연애/배우자운', family: '✦ 2026년 가족운', health: '✦ 2026년 건강/생활리듬',
+          caution: '✦ 2026년 조심해야 할 시기', strategy: '✦ 복을 키우는 2026년 행동 가이드', conclusion: '✦ 2026년의 핵심 총평',
+          monthly: '✦ 2026년 월별 세운 (12개월)',
         },
         en: {
-          totalFortune: '✦ Annual Fortune — The Big Picture', firstHalf: '✦ First Half Flow', secondHalf: '✦ Second Half Flow',
-          wealth: '✦ Wealth Fortune', career: '✦ Career & Business', relations: '✦ Relationships',
-          love: '✦ Love & Partnership', family: '✦ Family Fortune', health: '✦ Health & Rhythm',
-          caution: '✦ Caution Periods', strategy: '✦ Strategy for Good Fortune', conclusion: '✦ Annual Summary',
-          monthly: '✦ Monthly Forecast (12 months)',
+          totalFortune: '✦ 2026 Annual Fortune', firstHalf: '✦ 2026 First Half', secondHalf: '✦ 2026 Second Half',
+          wealth: '✦ 2026 Wealth Fortune', career: '✦ 2026 Career & Business', relations: '✦ 2026 Relationships',
+          love: '✦ 2026 Love & Partnership', family: '✦ 2026 Family Fortune', health: '✦ 2026 Health & Rhythm',
+          caution: '✦ 2026 Caution Periods', strategy: '✦ 2026 Strategy Guide', conclusion: '✦ 2026 Annual Summary',
+          monthly: '✦ 2026 Monthly Forecast',
         }
       };
       const lbl = L[lng === 'ko' ? 'ko' : 'en'];
@@ -991,7 +1081,7 @@ const App = {
     this.elements.langToggleBtn.setAttribute('data-lang', storedLang);
     this.applyUILanguage(storedLang);
     this.elements.nameInput.value  = storedName;
-    this.elements.emailInput.value = storedEmail;
+    if (this.elements.emailInput) this.elements.emailInput.value = storedEmail;
     this.elements.birthTimeSelect.value = storedTime;
 
     if (storedBirth) {
@@ -1019,7 +1109,7 @@ const App = {
 
     const lang      = this.elements.langToggleBtn.getAttribute('data-lang') as LanguageCode || 'en';
     const name      = this.elements.nameInput.value.trim();
-    const email     = this.elements.emailInput.value.trim();
+    const email     = this.elements.emailInput?.value.trim() ?? '';
     const birthTime = this.elements.birthTimeSelect.value;
     
     localStorage.setItem('saju_user_birth',  dateStr);
@@ -1041,23 +1131,23 @@ const App = {
       return;
     }
 
-    // LOGIN REQUIREMENT: Force users to sign in before continuing
-    if (!this.user) {
-      this.showLoginModal();
-      return; 
-    }
-
-    // 1-Day Free Trial Check using authentic user creation date
-    const premiumUnlocked = localStorage.getItem('saju_premium_unlocked') === 'true' || this.isPremium;
-    const createdAt = new Date(this.user.created_at).getTime();
-    const daysPassed = (Date.now() - createdAt) / (1000 * 60 * 60 * 24);
-
-    if (daysPassed > 1 && !premiumUnlocked) {
-      this.switchScreen('paywall');
-      return; // Halt transition to meditation
-    }
+    // Proceed freely — no login required for free users
 
     this.presentMeditation(dateStr, lang);
+  },
+
+  unlockPremiumLocally() {
+    this.isPremium = true;
+    localStorage.setItem('saju_premium_unlocked', 'true');
+    localStorage.setItem('saju_premium_plan', 'premium'); // Or 'ad_free'
+    
+    // Refresh the UI if on meditation screen
+    if (this.screens.meditation.classList.contains('view-active')) {
+      const lockedView = document.getElementById('premium-locked-view');
+      const unlockedView = document.getElementById('premium-unlocked-view');
+      if (lockedView) lockedView.style.display = 'none';
+      if (unlockedView) unlockedView.style.display = 'block';
+    }
   },
 
   switchScreen(target: 'landing' | 'entry' | 'meditation' | 'paywall') {
@@ -1069,8 +1159,19 @@ const App = {
     
     // Show target
     if (this.screens[target]) {
-      this.screens[target].scrollTop = 0;
+      this.screens[target].scrollTop = 0; // Legacy inner-scroll reset
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' }); // Native scroll reset
       this.screens[target].classList.add('view-active');
+    }
+
+    // Toggle Back Button visibility
+    const backBtn = document.getElementById('global-back-btn');
+    if (backBtn) {
+      if (target === 'landing') {
+        backBtn.classList.remove('show');
+      } else {
+        backBtn.classList.add('show');
+      }
     }
   },
 
@@ -1293,8 +1394,8 @@ const App = {
       // Only hide/show the premium ROW based on birth time selection.
       ptCard.style.removeProperty('display');
       const premRow = document.getElementById('premium-locked-view');
-      
-      const isPremium = localStorage.getItem('saju_premium_unlocked') === 'true';
+      const isAdUnlocked = this.isCurrentSessionUnlocked;
+      const isPremium = localStorage.getItem('saju_premium_unlocked') === 'true' || isAdUnlocked;
       if (isPremium) {
         if (premRow) premRow.style.display = 'none';
         ptUnlocked.style.display = 'block';
@@ -1323,19 +1424,19 @@ const App = {
           // Build UI labels
           const L = {
             ko: {
-              totalFortune: '✦ 총운 — 올해의 큰 흐름', firstHalf: '✦ 상반기 흐름', secondHalf: '✦ 하반기 흐름',
-              wealth: '✦ 재물운', career: '✦ 직업/사업운', relations: '✦ 인간관계/대인운',
-              love: '✦ 연애/배우자운', family: '✦ 가족운', health: '✦ 건강/생활리듬',
-              caution: '✦ 조심해야 할 시기', strategy: '✦ 복을 키우는 행동 가이드', conclusion: '✦ 올해의 핵심 총평',
-              monthly: '✦ 월별 세운 (12개월)', premiumOnly: '✦ 프리미엄 전용 (업그레이드 필요)',
+              totalFortune: '✦ 2026년 총운 — 한 해의 큰 흐름', firstHalf: '✦ 2026년 상반기 흐름', secondHalf: '✦ 2026년 하반기 흐름',
+              wealth: '✦ 2026년 재물운', career: '✦ 2026년 직업/사업운', relations: '✦ 2026년 인간관계/대인운',
+              love: '✦ 2026년 연애/배우자운', family: '✦ 2026년 가족운', health: '✦ 2026년 건강/생활리듬',
+              caution: '✦ 2026년 조심해야 할 시기', strategy: '✦ 복을 키우는 2026년 행동 가이드', conclusion: '✦ 2026년의 핵심 총평',
+              monthly: '✦ 2026년 월별 세운 (12개월)', premiumOnly: '✦ 프리미엄 전용 (업그레이드 필요)',
               upgradeBtn: '프리미엄으로 업그레이드 ($4.99)',
             },
             en: {
-              totalFortune: '✦ Annual Fortune — The Big Picture', firstHalf: '✦ First Half Flow', secondHalf: '✦ Second Half Flow',
-              wealth: '✦ Wealth Fortune', career: '✦ Career & Business', relations: '✦ Relationships',
-              love: '✦ Love & Partnership', family: '✦ Family Fortune', health: '✦ Health & Rhythm',
-              caution: '✦ Caution Periods', strategy: '✦ Strategy for Good Fortune', conclusion: '✦ Annual Summary',
-              monthly: '✦ Monthly Forecast (12 months)', premiumOnly: '✦ Premium Exclusive (Upgrade Required)',
+              totalFortune: '✦ 2026 Annual Fortune', firstHalf: '✦ 2026 First Half', secondHalf: '✦ 2026 Second Half',
+              wealth: '✦ 2026 Wealth Fortune', career: '✦ 2026 Career & Business', relations: '✦ 2026 Relationships',
+              love: '✦ 2026 Love & Partnership', family: '✦ 2026 Family Fortune', health: '✦ 2026 Health & Rhythm',
+              caution: '✦ 2026 Caution Periods', strategy: '✦ 2026 Strategy Guide', conclusion: '✦ 2026 Annual Summary',
+              monthly: '✦ 2026 Monthly Forecast', premiumOnly: '✦ Premium Exclusive (Upgrade Required)',
               upgradeBtn: 'Upgrade to Premium ($4.99)',
             }
           };
@@ -1558,6 +1659,39 @@ const App = {
                 tabBar.scrollLeft += e.deltaY;
               }
             }, { passive: false });
+
+            // ── Arrow Navigation ──────────────────────────────────────
+            const arrowLeft  = document.getElementById('tab-arrow-left')  as HTMLButtonElement | null;
+            const arrowRight = document.getElementById('tab-arrow-right') as HTMLButtonElement | null;
+
+            const SCROLL_STEP = 130; // px per click
+
+            const updateTabArrows = () => {
+              if (!arrowLeft || !arrowRight) return;
+              const atStart = tabBar.scrollLeft <= 4;
+              const atEnd   = tabBar.scrollLeft >= tabBar.scrollWidth - tabBar.clientWidth - 4;
+
+              // Left arrow: invisible at start (still takes space — no layout shift)
+              arrowLeft.style.visibility  = atStart ? 'hidden' : 'visible';
+              // Right arrow: invisible at end
+              arrowRight.style.visibility = atEnd   ? 'hidden' : 'visible';
+            };
+
+            // Update arrows on scroll (covers both touch-drag and mouse-drag)
+            tabBar.addEventListener('scroll', updateTabArrows, { passive: true });
+
+            // Click: scroll one step left
+            arrowLeft?.addEventListener('click', () => {
+              tabBar.scrollBy({ left: -SCROLL_STEP, behavior: 'smooth' });
+            });
+
+            // Click: scroll one step right
+            arrowRight?.addEventListener('click', () => {
+              tabBar.scrollBy({ left: SCROLL_STEP, behavior: 'smooth' });
+            });
+
+            // Set initial arrow state after chips are painted
+            requestAnimationFrame(updateTabArrows);
           }
 
           // Time disclaimer
@@ -1672,6 +1806,68 @@ const App = {
         }
       }, delay);
     });
+
+    // ── Engine Popup Modal Logic ───────────────────────────────────
+    const popupBtn = document.getElementById('ui-btn-engine-popup');
+    const engineModalOverlay = document.getElementById('engine-modal-overlay');
+    const engineModalContent = document.getElementById('engine-modal-content');
+
+    const showEngineModal = () => {
+      if (!engineModalOverlay || !engineModalContent) return;
+      engineModalOverlay.style.display = 'flex';
+      void engineModalOverlay.offsetWidth; // Force reflow
+      engineModalOverlay.style.opacity = '1';
+      engineModalContent.style.transform = 'translateY(0)';
+    };
+
+    const hideEngineModal = () => {
+      if (!engineModalOverlay || !engineModalContent) return;
+      engineModalOverlay.style.opacity = '0';
+      engineModalContent.style.transform = 'translateY(100%)';
+      setTimeout(() => {
+        engineModalOverlay.style.display = 'none';
+      }, 300);
+    };
+
+    if (popupBtn) popupBtn.addEventListener('click', showEngineModal);
+    if (engineModalOverlay) {
+      engineModalOverlay.addEventListener('click', (e) => {
+        if (e.target === engineModalOverlay) hideEngineModal();
+      });
+    }
+
+    // Swipe down to close for Mobile
+    if (engineModalContent) {
+      let startY = 0;
+      let currentY = 0;
+      let isDragging = false;
+
+      engineModalContent.addEventListener('touchstart', (e) => {
+        startY = e.touches[0].clientY;
+        isDragging = true;
+        engineModalContent.style.transition = 'none';
+      }, {passive: true});
+
+      engineModalContent.addEventListener('touchmove', (e) => {
+        if (!isDragging) return;
+        currentY = e.touches[0].clientY;
+        if (currentY > startY) {
+          engineModalContent.style.transform = `translateY(${currentY - startY}px)`;
+        }
+      }, {passive: true});
+
+      engineModalContent.addEventListener('touchend', () => {
+        if (!isDragging) return;
+        isDragging = false;
+        engineModalContent.style.transition = 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+        if (currentY - startY > 100) {
+          hideEngineModal();
+        } else {
+          engineModalContent.style.transform = 'translateY(0)';
+        }
+      });
+    }
+
   }
 
 };

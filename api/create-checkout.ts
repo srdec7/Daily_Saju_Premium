@@ -17,29 +17,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     console.log('[API] Creating checkout for:', email, 'Plan:', plan, 'Lang:', lang);
     console.log('[API] STRIPE_SECRET_KEY exists:', !!process.env.STRIPE_SECRET_KEY);
 
-    if (!email || !email.includes('@')) {
+    if (email && !email.includes('@')) {
       console.warn('[API] Invalid email provided:', email);
-      return res.status(400).json({ error: 'Valid email is required to unlock premium' });
+      return res.status(400).json({ error: 'If an email is provided, it must be valid' });
     }
 
-    let unitAmount = 499; // Default to $4.99 Premium
-    let productName = 'DAILY SAJU: 심층 프리미엄 패스 (1년 + 올해 사주운세)';
-    let productDesc = '매일 무제한 생성되는 1년치 데일리 사주 + 올해의 재물, 직업, 연애 심층 분석 및 12개월 세운 로드맵';
+    let unitAmount = 199; // $1.99 Remove Ads
+    let productName = 'DAILY SAJU: 평생 광고 제거';
+    let productDesc = '모든 운세 결과의 프리미엄 영역을 평생 광고 없이 편안하게 이용하세요.';
 
     if (lang === 'en') {
-      productName = 'DAILY SAJU: Premium Deep Pass (1-Year & This Year Fortune)';
-      productDesc = '1-Year Daily Saju Access + This Year Deep Analysis & 12-Month Fortune Roadmap';
-    }
-
-    if (plan === 'standard') {
-      unitAmount = 299; // $2.99 Standard
-      productName = 'DAILY SAJU: 스탠다드 패스 (1년 + 올해 사주운세)';
-      productDesc = '매일 무제한 생성되는 1년치 데일리 사주 + 올해 토정비결 총운 및 상/하반기 분석';
-      
-      if (lang === 'en') {
-        productName = 'DAILY SAJU: Standard Pass (1-Year & This Year Fortune)';
-        productDesc = '1-Year Daily Saju Access + This Year Basic Tojeong Analysis';
-      }
+      productName = 'DAILY SAJU: Remove Ads Forever';
+      productDesc = 'Enjoy unlimited ad-free access to all detailed saju readings permanently.';
     }
 
     // Determine base URL dynamically or fallback to the Vercel URL
@@ -66,9 +55,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       locale: lang === 'ko' ? 'ko' : 'auto',
       success_url: `${origin}/?success=true&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/`,
-      customer_email: email,
+      ...(email ? { customer_email: email } : {}),
       metadata: {
-        sajuPremiumEmail: email,
+        sajuPremiumEmail: email || '',
         sajuUserId: userId || '',
         sajuPlan: plan || 'premium',
       }

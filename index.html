@@ -42,7 +42,12 @@
       <div class="lang-slider"></div>
     </button>
 
-    <!-- 0. Landing Screen -->
+    <!-- Global Back Button (Top Left) -->
+    <button type="button" id="global-back-btn" class="global-back-btn" aria-label="Go Back">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right:2px;"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+
+   <!-- 0. Landing Screen -->
     <div id="landing-screen" class="screen view-active">
       <div class="landing-content">
         <!-- Exact Same Logo Block -->
@@ -67,13 +72,11 @@
           <div class="landing-scroll-space"></div>
         </div>
 
-        <!-- Enter -->
-        <button type="button" class="btn-begin btn-enter" id="ui-btn-enter">
-          ENTER SECRETS
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M5 12h14M13 6l6 6-6 6"/>
-          </svg>
-        </button>
+        <!-- Actions Row: compact equal-size buttons -->
+        <div style="display: flex; gap: 0.6rem; width: 82%; max-width: 340px; margin: 1.8rem auto 0;">
+          <button type="button" id="ui-btn-engine-popup" style="flex: 1; padding: 0.6rem 0.35rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(200,168,79,0.5); color: var(--gold); border-radius: 12px; font-weight: 600; font-size: 0.78rem; cursor: pointer; transition: background 0.2s;">데일리 사주란?</button>
+          <button type="button" id="ui-btn-enter" style="flex: 1; padding: 0.6rem 0.35rem; background: var(--gold); border: 1px solid var(--gold); color: #1a1009; border-radius: 12px; font-weight: 700; font-size: 0.78rem; cursor: pointer; transition: opacity 0.2s;"><span id="ui-btn-enter-text">입장하기 →</span></button>
+        </div>
       </div>
     </div>
 
@@ -166,6 +169,8 @@
           </form>
 
         </div><!-- /entry-card -->
+
+        <!-- Engine info moved to modal -->
 
       </div><!-- /entry-screen -->
 
@@ -332,37 +337,78 @@
             <p  id="action-text"></p>
           </div>
 
-          <!-- ⑧ Fortune Tiles -->
+          <!-- Fortune Tiles -->
           <div class="fortune-tiles fade-hidden" id="fortune-tiles"></div>
 
-          <!-- ⑧.5 + ⑨ Compact bottom bar -->
+          <!-- Bottom Premium Card -->
           <div class="bottom-bar fade-hidden" id="premium-time-card">
 
-            <!-- Premium locked row (Hybrid: Watch Ad / $1.99 Remove Ads) -->
+            <!-- Premium LOCKED row -->
             <div id="premium-locked-view" class="prem-action-teaser" style="margin-top: 2rem; padding: 1.5rem; border: 1px solid rgba(200,168,79,0.3); border-radius: 16px; background: rgba(0,0,0,0.4); text-align: center;">
 
-              <h3 style="font-family: var(--font-serif); color: var(--gold); font-size: 1.3rem; margin-bottom: 0.5rem; font-weight: 700;" id="ui-teaser-title">Unlock Your Full Destiny</h3>
-              <p style="font-family: var(--font-sans); font-size: 0.85rem; color: rgba(255,255,255,0.7); margin-bottom: 1.5rem; line-height: 1.5;" id="ui-teaser-desc">Watch a short video ad to explore your wealth, career, and love flow deeply.</p>
+              <h3 style="font-family: var(--font-serif); color: var(--gold); font-size: 1rem; font-weight: 700; white-space: nowrap; margin-bottom: 0.5rem;" id="ui-teaser-title">당신의 2026년 전체 운명 리포트</h3>
+              <p style="font-size: 0.85rem; color: rgba(255,255,255,0.7); margin-bottom: 1.2rem; line-height: 1.5;" id="ui-teaser-desc">동영상 광고를 시청하고 모든 카테고리를 오늘 무료로 확인하세요.</p>
 
-              <!-- Watch Ad Button -->
-              <button type="button" class="btn-begin" id="ui-btn-watch-ad" style="padding: 1rem 0; width: 100%; font-size: 1rem; font-weight: 700; margin-bottom: 1rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M8 5v14l11-7z"/>
-                </svg>
-                <span id="ui-btn-watch-ad-text">▶ Watch Ad to Unlock Reading</span>
-              </button>
+              <!-- Feature list grid -->
+              <div style="text-align: left; background: rgba(255,255,255,0.03); padding: 0.9rem 1rem; border-radius: 10px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 1.2rem;">
+                <div style="font-weight: 700; color: var(--gold); margin-bottom: 0.7rem; text-align: center; border-bottom: 1px dashed rgba(195,163,67,0.3); padding-bottom: 0.4rem; font-size: 0.78rem;" id="ui-teaser-list-title">열람 가능한 2026 운세 카테고리</div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.45rem; font-size: 0.74rem; color: rgba(255,255,255,0.85);">
+                  <div>✓ <span id="ui-t-f1">2026년 총운</span></div>
+                  <div>✓ <span id="ui-t-f2">상반기/하반기</span></div>
+                  <div>✓ <span id="ui-t-f3">2026 재물운</span></div>
+                  <div>✓ <span id="ui-t-f4">직업 및 사업운</span></div>
+                  <div>✓ <span id="ui-t-f5">연애/배우자운</span></div>
+                  <div>✓ <span id="ui-t-f6">인간관계/대인운</span></div>
+                  <div>✓ <span id="ui-t-f7">2026 월별 세운</span></div>
+                  <div>✓ <span id="ui-t-f8">건강/행동 가이드</span></div>
+                </div>
+              </div>
 
-              <!-- Remove Ads Button (IAP) -->
-              <button type="button" id="ui-btn-remove-ads" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(195,163,67,0.3); border-radius: 12px; font-size: 0.85rem; color: var(--gold); cursor: pointer; padding: 0.9rem; width: 100%; transition: background 0.2s;">
-                Remove Ads Forever ($1.99)
-              </button>
+              <!-- Action buttons -->
+              <div style="display: flex; align-items: stretch; gap: 0.5rem;">
+
+                <!-- Watch Ad button -->
+                <button type="button" id="ui-btn-watch-ad" style="flex: 1; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1rem 0.5rem; cursor: pointer; color: #fff;">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" style="margin-bottom: 0.4rem;">
+                    <path d="M21 3H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h5v2h8v-2h5c1.1 0 1.99-.9 1.99-2L23 5c0-1.1-.9-2-2-2zm0 14H3V5h18v12zm-5-6l-7 4V7z"/>
+                  </svg>
+                  <span id="ui-btn-watch-ad-text" style="font-size: 0.78rem; font-weight: 700; line-height: 1.3; text-align: center;">광고 시청 후 보기</span>
+                </button>
+
+                <!-- OR Divider -->
+                <div class="teaser-or-divider" style="display: flex; flex-direction: column; align-items: center; justify-content: center; color: rgba(255,255,255,0.4); font-size: 0.70rem; font-weight: 700; letter-spacing: 0.05em; padding: 0 0.2rem;">
+                  <div style="width: 1px; height: 100%; min-height: 20px; background: rgba(255,255,255,0.1); margin-bottom: 0.4rem; flex: 1;"></div>
+                  <span>OR</span>
+                  <div style="width: 1px; height: 100%; min-height: 20px; background: rgba(255,255,255,0.1); margin-top: 0.4rem; flex: 1;"></div>
+                </div>
+
+                <!-- Remove Ads Button (Square) -->
+                <button type="button" class="btn-teaser-square" id="ui-btn-remove-ads" style="flex: 1; background: rgba(195,163,67,0.1); border: 1px solid rgba(195,163,67,0.4); border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1.2rem 0.5rem; cursor: pointer; transition: background 0.2s; color: var(--gold);">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-bottom: 0.5rem;">
+                    <rect x="3" y="5" width="18" height="14" rx="2" ry="2"/><line x1="3" y1="10" x2="21" y2="10"/>
+                  </svg>
+                  <span id="ui-btn-remove-ads-text" style="font-size: 0.85rem; font-weight: 700; text-align: center; line-height: 1.3;">1-Year Ad-Free Pass ($1.99)</span>
+                </button>
+
+              </div>
             </div>
 
             <!-- Premium unlocked row -->
             <div class="prem-unlocked-row" id="premium-unlocked-view" style="display:none;">
 
-              <!-- Tab Navigation Bar -->
-              <div class="prem-tab-bar" id="prem-tab-bar" role="tablist" aria-label="Fortune categories"></div>
+              <!-- Tab bar with scroll arrows -->
+              <div id="tab-bar-wrapper" style="display:flex;align-items:center;width:100%;margin-bottom:0.5rem;gap:0.2rem;">
+                <!-- Left Arrow: bare chevron, hidden at start, takes space so no layout shift -->
+                <button type="button" id="tab-arrow-left" aria-label="이전" style="visibility:hidden;display:flex;flex-shrink:0;align-items:center;justify-content:center;width:22px;height:100%;background:none;border:none;cursor:pointer;padding:0;opacity:0.9;">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c8a84f" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" style="filter:drop-shadow(0 0 4px rgba(200,168,79,0.4));"><polyline points="15 18 9 12 15 6"/></svg>
+                </button>
+                <!-- Tab Bar -->
+                <div class="prem-tab-bar" id="prem-tab-bar" role="tablist" aria-label="Fortune categories" style="flex:1;overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none;display:flex;gap:0.35rem;padding:0.35rem 0;scroll-behavior:smooth;"></div>
+                <!-- Right Arrow: bare chevron, visible at start -->
+                <button type="button" id="tab-arrow-right" aria-label="다음" style="visibility:visible;display:flex;flex-shrink:0;align-items:center;justify-content:center;width:22px;height:100%;background:none;border:none;cursor:pointer;padding:0;opacity:0.9;">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c8a84f" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" style="filter:drop-shadow(0 0 4px rgba(200,168,79,0.4));"><polyline points="9 18 15 12 9 6"/></svg>
+                </button>
+              </div>
 
               <!-- SVG Eastern Line Motif (animated on tab switch) -->
               <div class="tab-motif-line" aria-hidden="true">
@@ -417,6 +463,35 @@
         <!-- Hidden Foreground Content (Kept to prevent JS null errors) -->
         <div style="display: none;">
           <h3 id="ui-ad-playing">Playing Ad...</h3>
+        </div>
+      </div>
+    </div>
+    <!-- Engine Bottom Sheet Modal -->
+    <div id="engine-modal-overlay" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 9999; opacity: 0; transition: opacity 0.3s; flex-direction: column; justify-content: flex-end;">
+      <div id="engine-modal-content" style="width: 100%; max-width: 600px; margin: 0 auto; background: #1a1a1a; border-radius: 24px 24px 0 0; padding: 2rem 2rem 4rem; border-top: 1px solid rgba(200,168,79,0.3); transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 -10px 30px rgba(0,0,0,0.5);">
+        <!-- Drag bar -->
+        <div id="engine-modal-drag" style="width: 40px; height: 5px; background: rgba(255,255,255,0.2); border-radius: 5px; margin: 0 auto 1.5rem; cursor: pointer;"></div>
+        
+        <h3 id="ui-engine-title" style="font-family: var(--font-serif); color: var(--gold); font-size: 1.2rem; margin-bottom: 1rem; font-weight: 700; text-align: center;">전통 사주명리학의 과학화</h3>
+        <p id="ui-engine-desc1" style="font-size: 0.85rem; color: rgba(255,255,255,0.8); line-height: 1.6; margin-bottom: 1.5rem; text-align: left; word-break: keep-all;">
+          데일리 사주는 <strong>수십만 건의 사주팔자 데이터 패턴</strong>을 정밀하게 분석하여 설계되었습니다.<br><br>
+          조선 시대부터 이어져 온 토정 이지함의 원본 <span style="color:var(--gold);">[토정비결]</span>과 송대 서자평의 <span style="color:var(--gold);">[자평진전]</span> 이론을 바탕으로, 동양의 순환론적 통계 우주관을 현대적인 알고리즘으로 완벽히 복원해냈습니다.
+        </p>
+        <div style="display: flex; flex-direction: column; gap: 0.8rem; text-align: left; background: rgba(255,255,255,0.03); padding: 1rem; border-radius: 12px; border: 1px solid rgba(200,168,79,0.2);">
+          <div style="display: flex; align-items: flex-start; gap: 0.5rem;">
+            <span style="color: var(--gold); font-size: 1.1rem; line-height: 1.2;">☯</span>
+            <div>
+              <div id="ui-engine-item1-title" style="font-weight: 700; font-size: 0.85rem; margin-bottom: 0.2rem; color: #fff;">수만 가지의 운명 경우의 수</div>
+              <div id="ui-engine-item1-desc" style="font-size: 0.75rem; color: rgba(255,255,255,0.6);">생년월일시에 따른 섬세하고 정확한 명리 스펙트럼 분석.</div>
+            </div>
+          </div>
+          <div style="display: flex; align-items: flex-start; gap: 0.5rem;">
+            <span style="color: var(--gold); font-size: 1.1rem; line-height: 1.2;">✦</span>
+            <div>
+              <div id="ui-engine-item2-title" style="font-weight: 700; font-size: 0.85rem; margin-bottom: 0.2rem; color: #fff;">1년의 거대한 기운 예측</div>
+              <div id="ui-engine-item2-desc" style="font-size: 0.75rem; color: rgba(255,255,255,0.6);">인생의 변곡점과 기회를 짚어주는 2026년 전문 토정비결.</div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

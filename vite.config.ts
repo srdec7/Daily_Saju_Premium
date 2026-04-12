@@ -30,6 +30,7 @@ export default defineConfig({
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,ts,json}'],
         cleanupOutdatedCaches: true,
+        navigateFallbackDenylist: [/^\/ads\.txt/],
       }
     })
   ]

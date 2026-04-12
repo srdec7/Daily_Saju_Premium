@@ -36,7 +36,6 @@
 
 html {
   width: 100%;
-  height: 100%;
 }
 
 h1, h2, h3, h4, h5, h6, .serif {
@@ -45,22 +44,20 @@ h1, h2, h3, h4, h5, h6, .serif {
 
 body {
   width: 100%;
-  min-height: 100%;
+  min-height: 100dvh;
   overflow-x: hidden;
-  overscroll-behavior-y: none; /* kill iOS vertical bounce on short screens */
   font-family: var(--font-sans);
   font-weight: 300;
   background: var(--bg);
   color: var(--text-1);
   -webkit-font-smoothing: antialiased;
-  /* Respect iPhone notch/home bar */
-  padding-left: env(safe-area-inset-left);
-  padding-right: env(safe-area-inset-right);
+  /* padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right); */
 }
 
 #app {
   width: 100%;
-  height: 100dvh;
+  min-height: 100dvh;
   position: relative;
 }
 
@@ -70,28 +67,46 @@ body {
 .screen {
   /* Each screen fills the full viewport and handles its own scroll */
   position: absolute;
-  inset: 0;
+  top: 0; left: 0; right: 0;
+  /* Do NOT use bottom: 0 or inset: 0, it forces height */
+  min-height: 100dvh;
+  height: 100dvh;
+
   opacity: 0;
   pointer-events: none;
   transition: opacity 1s cubic-bezier(0.25, 0.1, 0.25, 1);
-  overflow-y: auto;
-  overflow-x: hidden;             /* completely block horizontal drift */
-  overscroll-behavior-y: none;    /* prevent floating bounce effect */
-  -webkit-overflow-scrolling: touch;
+  overflow: hidden; /* Hide overflow when inactive */
+  
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;  /* card always anchors from top */
-  /* top padding clears safe-area + music button (~48px) + 12px gap */
-  padding-top: calc(env(safe-area-inset-top) + 60px);
+  /* Remove top/bottom hard paddings from generic screen, move them inside if needed */
+  padding-top: calc(env(safe-area-inset-top) + 64px);
   padding-bottom: calc(env(safe-area-inset-bottom) + 24px);
   padding-left: 1rem;
   padding-right: 1rem;
 }
 
 .screen.view-active {
+  position: relative; /* Join normal document flow so BODY handles the scroll natively! */
   opacity: 1;
   pointer-events: auto;
+  overflow: visible; /* Let content expand container for native body scrolling */
+  height: auto; /* Allow full height for scrolling */
+}
+
+/* Landing screen must NOT scroll — lock it to viewport height */
+#landing-screen {
+  min-height: unset;
+  height: 100dvh;
+  overflow: hidden;
+  justify-content: center; /* vertically centre all landing content */
+}
+#landing-screen.view-active {
+  position: fixed; /* take it out of flow so nothing below it creates scroll space */
+  top: 0; left: 0; right: 0;
+  display: flex;
 }
 
 
@@ -174,21 +189,11 @@ body {
    LANDING SCREEN
    ===================================== */
 #landing-screen {
-  display: none;
   width: 100%;
-  height: 100%;
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: center;
-  text-align: center;
-  padding: 4.5rem 2rem 2rem; /* top padding clears music bar + lang toggle */
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior: contain;
-}
-
-#landing-screen.view-active {
-  display: flex;
+  padding-top: calc(env(safe-area-inset-top) + 4rem);
+  padding-bottom: calc(env(safe-area-inset-bottom) + 1rem);
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
 }
 
 .landing-content {
@@ -198,6 +203,10 @@ body {
   flex-direction: column;
   align-items: center;
   z-index: 10;
+  flex-shrink: 0;
+  padding-bottom: 0.5rem;
+  margin: 0 auto;
+  text-align: center;
 }
 
 .landing-title {
@@ -210,10 +219,10 @@ body {
 }
 
 .landing-intro-text {
-  font-size: 0.95rem;
-  line-height: 1.8;
+  font-size: 0.9rem;
+  line-height: 1.75;
   color: var(--text-2);
-  margin-bottom: 3.5rem;
+  margin-bottom: 1.2rem;
   text-align: center;
   font-weight: 300;
 }
@@ -561,7 +570,7 @@ body {
   width: 100%;
   max-width: 420px;      /* matches entry-card width */
   margin: 0 auto;
-  padding: 1.2rem 1.4rem 6rem;
+  padding: 1.2rem 1.4rem 2.5rem;
   background: var(--card-bg);
   border: 1px solid var(--card-border);
   border-radius: 24px;
@@ -954,8 +963,12 @@ body {
    MOBILE — FINE-TUNE
    ===================================== */
 @media (max-width: 420px) {
-  .entry-card, .result-card {
-    padding: 1.6rem 1.4rem 6rem;
+  .result-card {
+    padding: 1.6rem 1.4rem 2.5rem;
+    border-radius: 20px;
+  }
+  .entry-card {
+    padding: 1.6rem 1.4rem 1.4rem;
     border-radius: 20px;
   }
 
@@ -1226,25 +1239,47 @@ body {
 .fab-btn svg { width: 1.2rem; height: 1.2rem; }
 
 /* =====================================
-   PREMIUM LANGUAGE TOGGLE (EN/KO)
+   PREMIUM LANGUAGE TOGGLE (EN/KO) & BACK BTN
    ===================================== */
+.global-back-btn,
 .lang-toggle-btn {
   position: fixed;
   top: calc(env(safe-area-inset-top) + 8px);
-  right: 1.2rem;
   z-index: 1000;
   display: flex;
   align-items: center;
   background: rgba(10, 11, 15, 0.6);
   border: 1px solid rgba(200, 168, 79, 0.25);
   border-radius: 100px;
-  padding: 2px;
-  width: 68px;
-  height: 32px;
   cursor: pointer;
   box-shadow: 0 4px 15px rgba(0,0,0,0.5);
   backdrop-filter: blur(10px);
 }
+
+.global-back-btn {
+  left: 1.2rem;
+  width: 32px;
+  height: 32px;
+  justify-content: center;
+  color: var(--text-1);
+  padding: 0;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.global-back-btn.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.lang-toggle-btn {
+  right: 1.2rem;
+  padding: 2px;
+  width: 68px;
+  height: 32px;
+}
+
 
 .lang-opt {
   flex: 1;
@@ -1303,16 +1338,17 @@ body {
 
 .prem-tab-chip {
   flex-shrink: 0;
-  padding: 0.4rem 0.9rem;
+  padding: 0.32rem 0.65rem;
   border-radius: 100px;
   border: 1px solid rgba(200,168,79,0.3);
   background: rgba(200,168,79,0.07);
   color: rgba(255,255,255,0.55);
-  font-size: 0.78rem;
+  font-size: 0.74rem;
   font-family: var(--font-serif);
   cursor: pointer;
   transition: all 0.25s ease;
   white-space: nowrap;
+  letter-spacing: 0.01em;
 }
 .prem-tab-chip:hover {
   background: rgba(200,168,79,0.15);
