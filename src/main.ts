@@ -136,6 +136,8 @@ const App = {
       this.checkStoredUser(); // Load state after auth is checked
     });
 
+    supabase.auth.onAuthStateChange((_event, session) => {
+      this.user = session?.user ?? null;
       if (this.user) {
         this.checkPremiumStatus(this.user.id);
       }
