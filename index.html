@@ -17,7 +17,9 @@
         function fixFontScale() {
           var tester = document.createElement('div');
           tester.style.width = '1rem';
-          tester.style.display = 'none';
+          tester.style.position = 'absolute';
+          tester.style.visibility = 'hidden';
+          tester.style.top = '-9999px';
           document.documentElement.appendChild(tester);
           var computed = parseFloat(window.getComputedStyle(tester).width);
           if (computed && computed !== 16) {
