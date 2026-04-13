@@ -1911,8 +1911,7 @@ const App = {
             text: cleanText,
             lang: 'ko-KR',
             rate: 0.9,
-            pitch: 1.0,
-            category: 'ambient',
+            pitch: 1.0
           });
           return;
         } catch (nativeErr) {
@@ -1920,10 +1919,14 @@ const App = {
         }
       }
 
-      // Cloud TTS/Web Audio fallback
-      const url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=ko&client=tw-ob&q=${encodeURIComponent(cleanText)}`;
-      const audio = new Audio(url);
-      audio.play().catch(e => console.warn('Cloud TTS Audio failed:', e));
+      // Synchronous Web TTS Fallback (Bypasses CORS/Native Blocks)
+      if (window.speechSynthesis) {
+        if (window.speechSynthesis.speaking) window.speechSynthesis.cancel();
+        (window as any).__utterance = new SpeechSynthesisUtterance(cleanText);
+        (window as any).__utterance.lang = 'ko-KR';
+        (window as any).__utterance.rate = 0.9;
+        window.speechSynthesis.speak((window as any).__utterance);
+      }
     } catch (e) {
       console.error('TTS Error:', e);
     }
