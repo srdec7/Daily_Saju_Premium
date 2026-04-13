@@ -1,12 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- Solid background color -->
-    <item android:drawable="#0a0b0f" />
-    
-    <!-- Centered Logo -->
+    <!-- Solid dark background -->
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="#0a0b0f" />
+        </shape>
+    </item>
+
+    <!-- Centered logo — no stretch, original aspect ratio preserved -->
     <item>
         <bitmap
             android:src="@drawable/splash"
-            android:gravity="center" />
+            android:gravity="center"
+            android:tileMode="disabled" />
     </item>
 </layer-list>
