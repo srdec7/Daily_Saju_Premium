@@ -141,7 +141,8 @@ const App = {
     // 2. DELAYED LOADING: Postpone heavy/blocking logic to ensure UI responsiveness
     setTimeout(() => {
       try {
-        this.initTTS();
+        // [v2.3 TEST] Temporarily disabling TTS to isolate freeze cause
+        // this.initTTS();
         
         // Supabase Auth Integration
         supabase.auth.getSession().then(({ data: { session } }) => {
