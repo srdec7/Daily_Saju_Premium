@@ -12,7 +12,28 @@
     
     <!-- Google AdSense logic removed from index.html (handled via AdManager and Native plugins to prevent WebView freezing/touch interception) -->
 
+    <script>
+      (function() {
+        function fixFontScale() {
+          var tester = document.createElement('div');
+          tester.style.width = '1rem';
+          tester.style.display = 'none';
+          document.documentElement.appendChild(tester);
+          var computed = parseFloat(window.getComputedStyle(tester).width);
+          if (computed && computed !== 16) {
+            var ratio = 16 / computed;
+            document.documentElement.style.fontSize = (16 * ratio) + 'px';
+          }
+          document.documentElement.removeChild(tester);
+        }
+        fixFontScale();
+        document.addEventListener('DOMContentLoaded', fixFontScale);
+        window.addEventListener('resize', fixFontScale);
+      })();
+    </script>
+
     <link rel="stylesheet" href="/src/style.css">
+
   </head>
   <body>
     <div id="app" class="viewport">
@@ -51,7 +72,7 @@
         <!-- Exact Same Logo Block -->
         <div class="logo-block" style="position: relative; display: flex; flex-direction: column; align-items: center; margin-top: 0.5rem; margin-bottom: 0.8rem;">
           <div style="display: flex; align-items: center; justify-content: center;">
-            <img src="/icon-512.png" alt="Daily Saju Logo" style="width: 210px; height: auto; margin-bottom: -0.2rem; pointer-events: none;" />
+            <img src="/icon-512.png" alt="Daily Saju Logo" style="width: 210px; max-width: 65vw; height: auto; margin-bottom: -0.2rem; pointer-events: none;" />
           </div>
           <p class="logo-sub-text" id="ui-landing-logo-sub" style="margin-top: 0; font-size: 0.70rem; letter-spacing: 0.25em; margin-bottom: 0;">DAILY SAJU RITUAL</p>
         </div>
