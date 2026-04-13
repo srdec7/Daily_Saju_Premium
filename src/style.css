@@ -36,6 +36,7 @@
 
 html {
   width: 100%;
+  font-size: 16px; /* Normalize scaling across mobile devices */
 }
 
 h1, h2, h3, h4, h5, h6, .serif {

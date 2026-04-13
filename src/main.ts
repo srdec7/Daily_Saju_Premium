@@ -94,16 +94,24 @@ const App = {
   },
 
   init() {
+    // 1. ABSOLUTE PRIORITY: Hide splash screen immediately to prevent freeze
+    if (Capacitor.isNativePlatform()) {
+      try {
+        SplashScreen.hide();
+      } catch (e) {
+        console.warn('SplashScreen.hide failed:', e);
+      }
+    }
+
     this.initAudioUnlock();
 
-    // Check Stripe success redirect
+    // Check Stripe success redirect (Keep sync if possible)
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('success') === 'true') {
       const sessionId = urlParams.get('session_id');
       if (sessionId) {
         this.verifyStripeSession(sessionId);
       } else {
-        // Fallback or old method
         localStorage.setItem('saju_premium_unlocked', 'true');
         const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
         window.history.replaceState({ path: cleanUrl }, '', cleanUrl);
@@ -129,28 +137,34 @@ const App = {
         }
       });
     }
-    
-    this.initTTS(); // Initialize speech engine safely
-    
-    // Supabase Auth Integration
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      this.user = session?.user ?? null;
-      if (this.user) {
-        this.checkPremiumStatus(this.user.id);
-      }
-      this.checkStoredUser(); // Load state after auth is checked
-    });
 
-    supabase.auth.onAuthStateChange((_event, session) => {
-      this.user = session?.user ?? null;
-      if (this.user) {
-        this.checkPremiumStatus(this.user.id);
+    // 2. DELAYED LOADING: Postpone heavy/blocking logic to ensure UI responsiveness
+    setTimeout(() => {
+      try {
+        this.initTTS();
+        
+        // Supabase Auth Integration
+        supabase.auth.getSession().then(({ data: { session } }) => {
+          this.user = session?.user ?? null;
+          if (this.user) {
+            this.checkPremiumStatus(this.user.id);
+          }
+          this.checkStoredUser();
+        });
+
+        supabase.auth.onAuthStateChange((_event, session) => {
+          this.user = session?.user ?? null;
+          if (this.user) {
+            this.checkPremiumStatus(this.user.id);
+          }
+        });
+      } catch (e) {
+        console.error('Delayed init error:', e);
       }
-    });
+    }, 500);
 
     // Native Back Button Handling (Android)
     if (Capacitor.isNativePlatform()) {
-      SplashScreen.hide(); // FORCE HIDE SPLASH
       CapApp.addListener('backButton', () => {
         // Find whichever screen is active and go back
         if (this.screens.meditation.classList.contains('view-active')) {
