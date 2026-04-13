@@ -323,7 +323,7 @@ const App = {
 
             // Start the native purchase process
             // NOTE: The productIdentifier 'com.dailysaju.premium' must match your store setup
-            const result = await NativePurchases.purchase({
+            const result = await NativePurchases.purchaseProduct({
               productIdentifier: 'com.dailysaju.premium',
             });
 
