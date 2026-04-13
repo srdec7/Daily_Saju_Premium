@@ -47,7 +47,9 @@ const App = {
     actionTitle: document.getElementById('action-title') as HTMLElement,
     actionText: document.getElementById('action-text') as HTMLElement,
     actionCard: document.getElementById('action-card') as HTMLElement,
+    btnTTS: document.getElementById('btn-tts') as HTMLButtonElement,
   },
+  voices: [] as SpeechSynthesisVoice[],
   
   async verifyStripeSession(sessionId: string) {
     try {
@@ -127,6 +129,8 @@ const App = {
         }
       });
     }
+    
+    this.initTTS(); // Initialize speech engine safely
     
     // Supabase Auth Integration
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -1276,6 +1280,18 @@ const App = {
     this.elements.actionTitle.textContent = actionTitleMap[lang] || 'Daily Prescription';
     if (this.elements.btnReset) this.elements.btnReset.textContent = ui.btnReset;
 
+    // ── ⑧ TTS Binding ───────────────────────────────────────────
+    if (this.elements.btnTTS) {
+      // Clean up old listeners by replacing the button or removing if possible (simplified here)
+      const newBtn = this.elements.btnTTS.cloneNode(true) as HTMLButtonElement;
+      this.elements.btnTTS.parentNode?.replaceChild(newBtn, this.elements.btnTTS);
+      this.elements.btnTTS = newBtn;
+
+      this.elements.btnTTS.addEventListener('click', () => {
+        this.speak(hwadu.char);
+      });
+    }
+
     // ── Fortune Tiles (Decoupled Combinatorial Mix) ─────────────
     const tilesEl = document.getElementById('fortune-tiles');
     const allTiles = localeData.fortuneTiles || [];
@@ -1852,7 +1868,45 @@ const App = {
       });
     }
 
-  }
+  },
+
+  initTTS() {
+    if (typeof window === 'undefined' || !window.speechSynthesis) return;
+    
+    const loadVoices = () => {
+      this.voices = window.speechSynthesis.getVoices();
+    };
+
+    loadVoices();
+    if (window.speechSynthesis.onvoiceschanged !== undefined) {
+      window.speechSynthesis.onvoiceschanged = loadVoices;
+    }
+  },
+
+  speak(text: string) {
+    if (!window.speechSynthesis) return;
+
+    // Stop any current speech
+    window.speechSynthesis.cancel();
+
+    try {
+      const utterance = new SpeechSynthesisUtterance(text);
+      
+      // Attempt to find a Korean voice
+      const koVoice = this.voices.find(v => v.lang.includes('ko') || v.lang.includes('KO'));
+      if (koVoice) {
+        utterance.voice = koVoice;
+        utterance.lang = 'ko-KR';
+      }
+
+      utterance.rate = 0.9; // Slightly slower for clarity
+      utterance.pitch = 1.0;
+      
+      window.speechSynthesis.speak(utterance);
+    } catch (e) {
+      console.error('TTS Error:', e);
+    }
+  },
 
 };
 
