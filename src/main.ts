@@ -14,6 +14,7 @@ import { Capacitor } from '@capacitor/core';
 import { App as CapApp } from '@capacitor/app';
 import { NativePurchases } from '@capgo/native-purchases';
 import { SplashScreen } from '@capacitor/splash-screen';
+import { TextToSpeech } from '@capacitor-community/text-to-speech';
 import { AdManager } from './adManager';
 const App = {
   user: null as any,
@@ -1898,13 +1899,28 @@ const App = {
     }
   },
 
-  speak(text: string) {
+  async speak(text: string) {
     try {
       // Strip out parenthetical Chinese Hanja
       const cleanText = text.replace(/\s*\(.*?\)\s*/g, '').trim();
       
-      // Use robust Cloud TTS fallback instead of native WebView synthesizer
-      // This completely bypasses all Android GC and WebView muting bugs.
+      // Attempt bulletproof OS-level TTS Engine Native Hook First
+      if (Capacitor.isNativePlatform()) {
+        try {
+          await TextToSpeech.speak({
+            text: cleanText,
+            lang: 'ko-KR',
+            rate: 0.9,
+            pitch: 1.0,
+            category: 'ambient',
+          });
+          return;
+        } catch (nativeErr) {
+          console.warn('Native TTS Hook failed, falling back to Web:', nativeErr);
+        }
+      }
+
+      // Cloud TTS/Web Audio fallback
       const url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=ko&client=tw-ob&q=${encodeURIComponent(cleanText)}`;
       const audio = new Audio(url);
       audio.play().catch(e => console.warn('Cloud TTS Audio failed:', e));
