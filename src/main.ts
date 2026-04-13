@@ -1905,18 +1905,20 @@ const App = {
       const cleanText = text.replace(/\s*\(.*?\)\s*/g, '').trim();
       
       // Ultimate universal TTS Fallback leveraging the open Youdao Dictionary API.
-      // This bypasses entirely all Android Speech API bugs, iOS Native crashes, and Google CORS origin blocks.
+      // Modifying a hardware-bound physical DOM audio element bypasses Android 9 GC bugs.
       const url = `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(cleanText)}&le=ko`;
-      const audio = new Audio(url);
-      audio.play().catch(e => {
-        console.warn('Cloud TTS Audio failed:', e);
-        // Desperate synchronous fallback if network streaming fails
-        if (window.speechSynthesis) {
-          const u = new SpeechSynthesisUtterance(cleanText);
-          u.lang = 'ko-KR';
-          window.speechSynthesis.speak(u);
-        }
-      });
+      const audioEl = document.getElementById('tts-audio') as HTMLAudioElement;
+      if (audioEl) {
+        audioEl.src = url;
+        audioEl.play().catch(e => {
+          console.warn('Physical Cloud TTS Audio failed:', e);
+          if (window.speechSynthesis) {
+            const u = new SpeechSynthesisUtterance(cleanText);
+            u.lang = 'ko-KR';
+            window.speechSynthesis.speak(u);
+          }
+        });
+      }
     } catch (e) {
       console.error('TTS Error:', e);
     }
