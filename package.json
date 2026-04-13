@@ -27,6 +27,7 @@
     "@capacitor/cli": "^8.3.0",
     "@capacitor/core": "^8.3.0",
     "@capacitor/ios": "^8.3.0",
+    "@capacitor/splash-screen": "^8.0.1",
     "@capgo/native-purchases": "^8.3.0",
     "@fontsource/noto-sans-kr": "^5.2.9",
     "@fontsource/noto-serif-kr": "^5.2.9",
