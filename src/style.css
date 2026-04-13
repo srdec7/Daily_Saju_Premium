@@ -58,6 +58,11 @@ body {
   padding-right: env(safe-area-inset-right); */
 }
 
+/* STRICT NARROW VIEWPORT DOWNSCALING HACKS */
+@media screen and (max-width: 390px) { html { font-size: 14px !important; } }
+@media screen and (max-width: 360px) { html { font-size: 13px !important; } }
+@media screen and (max-width: 335px) { html { font-size: 11px !important; } }
+
 #app {
   width: 100%;
   min-height: 100dvh;

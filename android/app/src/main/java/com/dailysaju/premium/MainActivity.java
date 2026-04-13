@@ -12,6 +12,9 @@ public class MainActivity extends BridgeActivity {
         try {
             WebView webView = this.bridge.getWebView();
             if (webView != null) {
+                // Aggressively clear cache to force loading of the new font-scale scripts
+                webView.clearCache(true);
+                
                 WebSettings settings = webView.getSettings();
                 settings.setTextZoom(100);
             }

@@ -1905,19 +1905,13 @@ const App = {
     window.speechSynthesis.cancel();
 
     try {
-      (window as any).__utterance = new SpeechSynthesisUtterance(text);
-      
-      // Attempt to find a Korean voice
-      const koVoice = this.voices.find(v => v.lang.includes('ko') || v.lang.includes('KO'));
-      if (koVoice) {
-        (window as any).__utterance.voice = koVoice;
-      }
-      (window as any).__utterance.lang = 'ko-KR';
-
-      (window as any).__utterance.rate = 0.9; // Slightly slower for clarity
-      (window as any).__utterance.pitch = 1.0;
-      
-      window.speechSynthesis.speak((window as any).__utterance);
+      setTimeout(() => {
+        (window as any).__utterance = new SpeechSynthesisUtterance(text);
+        (window as any).__utterance.lang = 'ko-KR';
+        (window as any).__utterance.rate = 0.9;
+        (window as any).__utterance.pitch = 1.0;
+        window.speechSynthesis.speak((window as any).__utterance);
+      }, 50);
     } catch (e) {
       console.error('TTS Error:', e);
     }
