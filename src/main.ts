@@ -1899,34 +1899,24 @@ const App = {
     }
   },
 
-  async speak(text: string) {
+  speak(text: string) {
     try {
       // Strip out parenthetical Chinese Hanja
       const cleanText = text.replace(/\s*\(.*?\)\s*/g, '').trim();
       
-      // Attempt bulletproof OS-level TTS Engine Native Hook First
-      if (Capacitor.isNativePlatform()) {
-        try {
-          await TextToSpeech.speak({
-            text: cleanText,
-            lang: 'ko-KR',
-            rate: 0.9,
-            pitch: 1.0
-          });
-          return;
-        } catch (nativeErr) {
-          console.warn('Native TTS Hook failed, falling back to Web:', nativeErr);
+      // Ultimate universal TTS Fallback leveraging the open Youdao Dictionary API.
+      // This bypasses entirely all Android Speech API bugs, iOS Native crashes, and Google CORS origin blocks.
+      const url = `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(cleanText)}&le=ko`;
+      const audio = new Audio(url);
+      audio.play().catch(e => {
+        console.warn('Cloud TTS Audio failed:', e);
+        // Desperate synchronous fallback if network streaming fails
+        if (window.speechSynthesis) {
+          const u = new SpeechSynthesisUtterance(cleanText);
+          u.lang = 'ko-KR';
+          window.speechSynthesis.speak(u);
         }
-      }
-
-      // Synchronous Web TTS Fallback (Bypasses CORS/Native Blocks)
-      if (window.speechSynthesis) {
-        if (window.speechSynthesis.speaking) window.speechSynthesis.cancel();
-        (window as any).__utterance = new SpeechSynthesisUtterance(cleanText);
-        (window as any).__utterance.lang = 'ko-KR';
-        (window as any).__utterance.rate = 0.9;
-        window.speechSynthesis.speak((window as any).__utterance);
-      }
+      });
     } catch (e) {
       console.error('TTS Error:', e);
     }
