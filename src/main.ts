@@ -13,6 +13,7 @@ import { supabase } from './lib/supabase';
 import { Capacitor } from '@capacitor/core';
 import { App as CapApp } from '@capacitor/app';
 import { NativePurchases } from '@capgo/native-purchases';
+import { SplashScreen } from '@capacitor/splash-screen';
 import { AdManager } from './adManager';
 const App = {
   user: null as any,
@@ -145,6 +146,7 @@ const App = {
 
     // Native Back Button Handling (Android)
     if (Capacitor.isNativePlatform()) {
+      SplashScreen.hide(); // FORCE HIDE SPLASH
       CapApp.addListener('backButton', () => {
         // Find whichever screen is active and go back
         if (this.screens.meditation.classList.contains('view-active')) {
@@ -1248,7 +1250,6 @@ const App = {
     // ── ③.1 Romanization + TTS (English only) ───────────────────
     const romanRow  = document.getElementById('hwadu-roman-row');
     const romanSpan = document.getElementById('hwadu-romanization');
-    const ttsBtn    = document.getElementById('btn-tts');
     if (romanRow && romanSpan) {
       if (lang !== 'ko' && hwaduRomanization) {
         romanSpan.textContent = hwaduRomanization;
@@ -1256,25 +1257,6 @@ const App = {
       } else {
         romanRow.style.display = 'none';
       }
-    }
-    if (ttsBtn) {
-      ttsBtn.onclick = () => {
-        if (!('speechSynthesis' in window)) return;
-        window.speechSynthesis.cancel();
-        const utt = new SpeechSynthesisUtterance(hwadu.char);
-        utt.lang = 'ko-KR';
-        utt.rate = 0.85;
-        utt.pitch = 1.05;
-        // Prefer a female Korean voice if available
-        const voices = window.speechSynthesis.getVoices();
-        const koVoice = voices.find(v => v.lang === 'ko-KR' && /female|yuna|sora/i.test(v.name))
-                     || voices.find(v => v.lang === 'ko-KR');
-        if (koVoice) utt.voice = koVoice;
-        window.speechSynthesis.speak(utt);
-        // Brief visual feedback
-        ttsBtn.style.borderColor = 'var(--gold)';
-        setTimeout(() => { ttsBtn.style.borderColor = 'rgba(255,255,255,0.2)'; }, 800);
-      };
     }
 
     // ── ③.5 Hwadu explanation ────────────────────────────────────
