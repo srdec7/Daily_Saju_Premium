@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">매일사주</string>
-    <string name="title_activity_main">매일사주</string>
+    <string name="app_name">Daily Saju</string>
+    <string name="title_activity_main">Daily Saju</string>
     <string name="package_name">com.dailysaju.premium</string>
     <string name="custom_url_scheme">com.dailysaju.premium</string>
 </resources>
