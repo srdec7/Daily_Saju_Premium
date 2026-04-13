@@ -1899,19 +1899,15 @@ const App = {
   },
 
   speak(text: string) {
-    if (!window.speechSynthesis) return;
-
-    // Stop any current speech
-    window.speechSynthesis.cancel();
-
     try {
-      setTimeout(() => {
-        (window as any).__utterance = new SpeechSynthesisUtterance(text);
-        (window as any).__utterance.lang = 'ko-KR';
-        (window as any).__utterance.rate = 0.9;
-        (window as any).__utterance.pitch = 1.0;
-        window.speechSynthesis.speak((window as any).__utterance);
-      }, 50);
+      // Strip out parenthetical Chinese Hanja
+      const cleanText = text.replace(/\s*\(.*?\)\s*/g, '').trim();
+      
+      // Use robust Cloud TTS fallback instead of native WebView synthesizer
+      // This completely bypasses all Android GC and WebView muting bugs.
+      const url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=ko&client=tw-ob&q=${encodeURIComponent(cleanText)}`;
+      const audio = new Audio(url);
+      audio.play().catch(e => console.warn('Cloud TTS Audio failed:', e));
     } catch (e) {
       console.error('TTS Error:', e);
     }
