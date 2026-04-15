@@ -39,3 +39,7 @@ val_*.txt
 dist
 build
 npm-debug.log*
+
+# Android Release Keystore Files
+*.jks
+keystore.properties
