@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>개인정보처리방침 | Daily Saju</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700&family=Noto+Serif+KR:wght@200;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0a0b10;
+            --card-bg: #14151a;
+            --gold: #c8a84f;
+            --text-main: #e0e0e0;
+            --text-dim: #a0a0a0;
+        }
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            font-family: 'Noto Sans KR', sans-serif;
+            line-height: 1.7;
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background: var(--card-bg);
+            padding: 40px;
+            border-radius: 20px;
+            border: 1px solid rgba(200, 168, 79, 0.2);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+        }
+        h1 {
+            font-family: 'Noto Serif KR', serif;
+            color: var(--gold);
+            font-size: 2rem;
+            margin-bottom: 10px;
+            letter-spacing: -0.02em;
+        }
+        .subtitle {
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            margin-bottom: 40px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 20px;
+        }
+        h2 {
+            font-family: 'Noto Serif KR', serif;
+            color: var(--gold);
+            font-size: 1.3rem;
+            margin-top: 30px;
+            margin-bottom: 15px;
+        }
+        p, li {
+            font-size: 0.95rem;
+            color: var(--text-main);
+        }
+        ul {
+            padding-left: 20px;
+        }
+        .footer {
+            margin-top: 50px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            color: var(--text-dim);
+            font-size: 0.85rem;
+            text-align: center;
+        }
+        @media (max-width: 600px) {
+            .container { padding: 25px; }
+            h1 { font-size: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>개인정보처리방침 (Privacy Policy)</h1>
+        <div class="subtitle">마지막 업데이트: 2026. 04. 15</div>
+
+        <p><strong>Daily Saju</strong>(이하 '앱')는 사용자의 개인정보를 소중하게 생각하며, 대한민국의 개인정보보호법 및 구글 플레이 스토어의 정책을 준수합니다.</p>
+
+        <h2>1. 수집하는 개인정보 항목 및 목적</h2>
+        <p>앱은 서비스 제공(사주 및 운세 계산)을 위해 다음과 같은 정보를 입력받습니다.</p>
+        <ul>
+            <li><strong>수집 항목</strong>: 이름, 성별, 생년월일, 태어난 시</li>
+            <li><strong>이용 목적</strong>: 사용자의 태어난 기운을 기반으로 한 사주팔자 및 오늘의 운세 결과 분석 및 제공</li>
+        </ul>
+
+        <h2>2. 개인정보의 저장 및 파기</h2>
+        <p>앱은 사용자의 사행성을 조장하거나 무단으로 정보를 수집하지 않습니다.</p>
+        <ul>
+            <li><strong>로컬 저장</strong>: 입력된 사주 정보는 사용자의 기기 내부(localStorage)에만 저장되며, 앱을 삭제하거나 데이터를 초기화할 때까지 유지됩니다.</li>
+            <li><strong>서버 전송</strong>: 앱은 분석을 위해 정보를 서버로 전송하지 않으며, 모든 계산은 기기 내에서 처리됩니다. (단, 프리미엄 결제 인증을 위한 이메일 정보는 예외적으로 Supabase를 통해 안전하게 관리됩니다.)</li>
+        </ul>
+
+        <h2>3. 유료 결제 및 광고</h2>
+        <ul>
+            <li><strong>광고</strong>: 앱은 구글 애드몹(Google AdMob)을 사용하여 광고를 게재할 수 있습니다. 이 과정에서 광고 식별자가 활용될 수 있습니다.</li>
+            <li><strong>결제</strong>: 구글 플레이 인앱 결제 혹은 Stripe를 통한 결제 시, 결제 처리는 해당 플랫폼의 보안 가이드라인에 따라 처리되며 앱은 사용자의 카드 정보를 직접 수집하거나 저장하지 않습니다.</li>
+        </ul>
+
+        <h2>4. 사용자의 권리 및 데이터 삭제</h2>
+        <p>사용자는 언제든지 앱 내 설정을 통해 데이터를 초기화하거나 삭제할 수 있는 권리를 가집니다. 또한, 프리미엄 계정(이메일 인증)을 생성한 사용자가 더 이상 서비스를 이용하지 않고 계정 및 관련 데이터를 완전히 삭제하고자 하는 경우, 아래의 방법을 통해 요청하실 수 있습니다.</p>
+        <ul>
+            <li><strong>삭제 요청 방법</strong>: 아래 문의처 이메일로 [계정 삭제 요청]이라는 제목과 함께 가입하신 이메일 주소를 보내주시기 바랍니다.</li>
+            <li><strong>처리 기간</strong>: 요청 확인 후 평일 기준 48시간 이내에 해당 계정 정보를 영구 파기합니다.</li>
+        </ul>
+
+        <h2>5. 문의처</h2>
+        <p>본 방침과 관련하여 궁금한 점이 있으시면 아래로 연락해 주시기 바랍니다.</p>
+        <p>이메일: [사용자님의 지메일 주소를 입력하세요]</p>
+
+        <div class="footer">
+            &copy; 2026 Daily Saju. All rights reserved.
+        </div>
+    </div>
+</body>
+</html>

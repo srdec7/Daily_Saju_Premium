@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Sitemap: https://daily-saju-premium.vercel.app/sitemap.xml
