@@ -10,6 +10,10 @@
       "dest": "/robots.txt"
     },
     {
+      "src": "/privacy.html",
+      "dest": "/privacy.html"
+    },
+    {
       "handle": "filesystem"
     },
     {
