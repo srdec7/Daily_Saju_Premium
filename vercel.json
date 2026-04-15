@@ -1,28 +1,13 @@
 {
-  "cleanUrls": false,
-  "routes": [
+  "cleanUrls": true,
+  "rewrites": [
     {
-      "src": "/ads.txt",
-      "dest": "/ads.txt"
+      "source": "/privacy",
+      "destination": "/privacy.html"
     },
     {
-      "src": "/robots.txt",
-      "dest": "/robots.txt"
-    },
-    {
-      "src": "/privacy.html",
-      "dest": "/privacy.html"
-    },
-    {
-      "src": "/privacy",
-      "dest": "/privacy.html"
-    },
-    {
-      "handle": "filesystem"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/index.html"
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ]
 }
