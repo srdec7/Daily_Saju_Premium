@@ -1903,24 +1903,56 @@ const App = {
     try {
       // Strip out parenthetical Chinese Hanja
       const cleanText = text.replace(/\s*\(.*?\)\s*/g, '').trim();
-      
-      // Ultimate universal TTS Fallback leveraging the open Youdao Dictionary API.
-      // Modifying a hardware-bound physical DOM audio element bypasses Android 9 GC bugs.
-      const url = `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(cleanText)}&le=ko`;
-      const audioEl = document.getElementById('tts-audio') as HTMLAudioElement;
-      if (audioEl) {
-        audioEl.src = url;
-        audioEl.play().catch(e => {
-          console.warn('Physical Cloud TTS Audio failed:', e);
-          if (window.speechSynthesis) {
+
+      // Tier 3: Cloud Audio API via physical DOM tag
+      const fireCloudAudio = () => {
+         const url = `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(cleanText)}&le=ko`;
+         const audioEl = document.getElementById('tts-audio') as HTMLAudioElement;
+         if (audioEl) {
+           audioEl.src = url;
+           audioEl.play().catch(err => console.error("Tier 3 Cloud TTS Failed:", err));
+         }
+      };
+
+      // Tier 2: Browser Web Speech API
+      const fireWebSpeech = () => {
+        if (typeof window !== 'undefined' && window.speechSynthesis) {
+          try {
             const u = new SpeechSynthesisUtterance(cleanText);
             u.lang = 'ko-KR';
+            u.rate = 0.9;
+            u.onerror = (e) => {
+              console.warn("Tier 2 Web Speech API Failed:", e);
+              fireCloudAudio();
+            };
             window.speechSynthesis.speak(u);
+            return;
+          } catch(e) {
+             console.warn("Tier 2 Web Speech Setup Failed:", e);
+             fireCloudAudio();
           }
+        } else {
+          fireCloudAudio();
+        }
+      };
+
+      // Tier 1: Native OS TTS Engine (Hardware)
+      if (Capacitor.isNativePlatform()) {
+        TextToSpeech.speak({
+          text: cleanText,
+          lang: 'ko-KR',
+          rate: 0.9,
+          pitch: 1.0
+        }).catch((err) => {
+          console.warn("Tier 1 Native TTS Error:", err);
+          fireWebSpeech();
         });
+      } else {
+        fireWebSpeech();
       }
+
     } catch (e) {
-      console.error('TTS Error:', e);
+      console.error('Master TTS Error:', e);
     }
   },
 
