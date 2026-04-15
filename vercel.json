@@ -1,5 +1,5 @@
 {
-  "cleanUrls": true,
+  "cleanUrls": false,
   "routes": [
     {
       "src": "/ads.txt",
@@ -11,6 +11,10 @@
     },
     {
       "src": "/privacy.html",
+      "dest": "/privacy.html"
+    },
+    {
+      "src": "/privacy",
       "dest": "/privacy.html"
     },
     {
