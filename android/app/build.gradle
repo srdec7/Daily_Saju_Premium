@@ -13,7 +13,7 @@ android {
         applicationId "com.dailysaju.premium"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 27
+        versionCode 28
         versionName "3.7"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
