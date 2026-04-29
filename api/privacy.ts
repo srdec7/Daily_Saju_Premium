@@ -115,7 +115,7 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
 
             <h2>5. Contact Us</h2>
             <p>If you have any questions regarding this policy, please contact us at:</p>
-            <p>Email: support@choroksagua.com</p>
+            <p>Email: srdec7@gmail.com</p>
         </div>
 
         <hr style="border-color: rgba(255,255,255,0.1); margin: 60px 0;">
@@ -156,7 +156,7 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
 
             <h2>5. 문의처</h2>
             <p>본 방침과 관련하여 궁금한 점이 있으시면 아래로 연락해 주시기 바랍니다.</p>
-            <p>이메일: support@choroksagua.com</p>
+            <p>이메일: srdec7@gmail.com</p>
         </div>
 
         <div class="footer">
