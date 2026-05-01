@@ -10,6 +10,14 @@
       "destination": "/api/privacy"
     },
     {
+      "source": "/shift-privacy",
+      "destination": "/api/shift-privacy"
+    },
+    {
+      "source": "/shift-privacy.html",
+      "destination": "/api/shift-privacy"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }

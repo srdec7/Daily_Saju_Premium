@@ -9,15 +9,20 @@ Ensure you have the following installed on your MacBook:
 - **CocoaPods** (Run `sudo gem install cocoapods` if not installed)
 
 ## 2. Setup
-1. Clone the repository:
+1. Clone the repository (or pull the latest `main` branch if you already have it):
    ```bash
    git clone https://github.com/srdec7/Daily_Saju_Premium.git
    cd Daily_Saju_Premium
+   
+   # If you already have it cloned:
+   # git checkout main
+   # git pull origin main
    ```
 2. Install dependencies:
    ```bash
    npm install
    ```
+   *Note: A critical crash fix for iOS has been pushed to the repository. The iOS App Store rejection was caused by missing `.env` variables during the local build. The codebase has been updated with safe fallbacks, so no `.env` file is needed anymore. Just ensure you pull the latest code before building.*
 
 ## 3. Build & Sync
 1. Build the web project:
