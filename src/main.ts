@@ -1184,7 +1184,7 @@ const App = {
     // Show target
     if (this.screens[target]) {
       this.screens[target].scrollTop = 0; // Legacy inner-scroll reset
-      window.scrollTo({ top: 0, left: 0, behavior: 'instant' }); // Native scroll reset
+      window.scrollTo({ top: 0, left: 0, behavior: 'auto' }); // Native scroll reset
       this.screens[target].classList.add('view-active');
     }
 
