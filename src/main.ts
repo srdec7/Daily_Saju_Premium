@@ -12,7 +12,7 @@ import { extendedHwadu } from './data/extendedHwadu';
 import { supabase } from './lib/supabase';
 import { Capacitor } from '@capacitor/core';
 import { App as CapApp } from '@capacitor/app';
-import { NativePurchases } from '@capgo/native-purchases';
+import { NativePurchases, PURCHASE_TYPE } from '@capgo/native-purchases';
 import { SplashScreen } from '@capacitor/splash-screen';
 import { TextToSpeech } from '@capacitor-community/text-to-speech';
 import { AdManager } from './adManager';
@@ -160,6 +160,13 @@ const App = {
             this.checkPremiumStatus(this.user.id);
           }
         });
+
+        // Native subscription status auto-check on startup
+        if (Capacitor.isNativePlatform()) {
+          this.checkNativeSubscriptionStatus().catch(err => {
+            console.error('[NativeIAP] Auto-check failed:', err);
+          });
+        }
       } catch (e) {
         console.error('Delayed init error:', e);
       }
@@ -184,10 +191,48 @@ const App = {
       });
     }
 
-    // Old restore logic replaced by Login Modal
+    // Old restore logic replaced by Login Modal / Native Purchase Restore
     const restoreBtn = document.getElementById('ui-paywall-restore');
     if (restoreBtn) {
       restoreBtn.addEventListener('click', async () => {
+        if (Capacitor.isNativePlatform()) {
+          try {
+            if (restoreBtn) {
+              restoreBtn.textContent = 'Restoring...';
+              restoreBtn.style.opacity = '0.7';
+            }
+            await NativePurchases.restorePurchases();
+            
+            const { purchases } = await NativePurchases.getPurchases({
+              productType: PURCHASE_TYPE.SUBS,
+            });
+            
+            console.log('[NativeIAP] Restored purchases:', purchases);
+            const productId = (import.meta as any).env.VITE_PLAY_STORE_SUBSCRIPTION_ID || 'com.dailysaju.premium';
+            const hasActiveSub = purchases.some(p => 
+              p.productIdentifier === productId && 
+              (p.purchaseState === "1" || p.purchaseState === "0" || p.isActive)
+            );
+            
+            if (hasActiveSub) {
+              this.unlockPremiumLocally();
+              alert('Purchase restored successfully!');
+              this.switchScreen('entry');
+            } else {
+              alert('No active subscription found for this account.');
+            }
+          } catch (e) {
+            console.error('[NativeIAP] Restore failed:', e);
+            alert('Failed to restore purchases. Please check your network connection.');
+          } finally {
+            if (restoreBtn) {
+              restoreBtn.textContent = 'Restore Purchase';
+              restoreBtn.style.opacity = '1';
+            }
+          }
+          return;
+        }
+
         const pin = prompt('Enter your receipt email to restore purchase:');
         if (pin) {
           try {
@@ -323,9 +368,15 @@ const App = {
             removeAdsBtn.style.opacity = '0.7';
 
             // Start the native purchase process
-            // NOTE: The productIdentifier 'com.dailysaju.premium' must match your store setup
+            // NOTE: The productIdentifier must match Google Play Console product ID
+            // And planIdentifier must match the base plan ID in Google Play Console
+            const productId = (import.meta as any).env.VITE_PLAY_STORE_SUBSCRIPTION_ID || 'com.dailysaju.premium';
+            const basePlanId = (import.meta as any).env.VITE_PLAY_STORE_BASE_PLAN_ID || 'yearly';
+
             const result = await NativePurchases.purchaseProduct({
-              productIdentifier: 'com.dailysaju.premium',
+              productIdentifier: productId,
+              planIdentifier: basePlanId,
+              productType: PURCHASE_TYPE.SUBS,
             });
 
             console.log('[NativeIAP] Purchase result:', result);
@@ -1158,6 +1209,27 @@ const App = {
     // Proceed freely — no login required for free users
 
     this.presentMeditation(dateStr, lang);
+  },
+
+  async checkNativeSubscriptionStatus() {
+    try {
+      const productId = (import.meta as any).env.VITE_PLAY_STORE_SUBSCRIPTION_ID || 'com.dailysaju.premium';
+      const { purchases } = await NativePurchases.getPurchases({
+        productType: PURCHASE_TYPE.SUBS,
+      });
+      
+      const hasActiveSub = purchases.some(p => 
+        p.productIdentifier === productId && 
+        (p.purchaseState === "1" || p.purchaseState === "0" || p.isActive)
+      );
+
+      if (hasActiveSub) {
+        console.log('[NativeIAP] Active subscription verified.');
+        this.unlockPremiumLocally();
+      }
+    } catch (e) {
+      console.warn('[NativeIAP] Auto purchase check failed:', e);
+    }
   },
 
   unlockPremiumLocally() {

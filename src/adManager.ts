@@ -1,6 +1,11 @@
+import { AdMob, RewardAdPluginEvents } from '@capacitor-community/admob';
+import type { AdMobRewardItem } from '@capacitor-community/admob';
+import { Capacitor } from '@capacitor/core';
+
 /**
  * AdManager
- * Handles the integration with Google AdSense (Ad Placement API / Rewarded Web).
+ * Handles the integration with Google AdMob for mobile platform,
+ * and falls back to a mock ad screen on web/error situations.
  */
 
 declare global {
@@ -14,12 +19,11 @@ declare global {
 export class AdManager {
   private static instance: AdManager;
   private isAdReady: boolean = false;
+  private isInitializing: boolean = false;
   
-  // =========================================================================
-  // TO ENABLE REAL ADS, SET VIRTUAL ENVIRONMENT VARIABLE: VITE_ADSENSE_PUB_ID
-  // e.g. VITE_ADSENSE_PUB_ID='ca-pub-1234567890123456'
-  // =========================================================================
-  public publisherId: string | null = (import.meta as any).env.VITE_ADSENSE_PUB_ID || null;
+  // Real or Test Ad Unit ID for Android.
+  // Test ID for Android Rewarded: ca-app-pub-3940256099942544/5224354917
+  public adUnitId: string = (import.meta as any).env.VITE_ADMOB_REWARD_ID || 'ca-app-pub-3940256099942544/5224354917';
 
   private constructor() {
     this.initAdSDK();
@@ -33,36 +37,28 @@ export class AdManager {
   }
 
   /**
-   * Initializes the Google AdSense Script and Ad Placement context
+   * Initializes the Google AdMob SDK
    */
-  private initAdSDK() {
-    if (this.publisherId) {
-      console.log(`[AdManager] Initializing real AdSense SDK for ${this.publisherId}`);
-      
-      // Inject AdSense script
-      const script = document.createElement('script');
-      script.async = true;
-      script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${this.publisherId}`;
-      script.crossOrigin = 'anonymous';
-      document.head.appendChild(script);
-
-      // Setup AdConfig queue
-      window.adsbygoogle = window.adsbygoogle || [];
-      window.adConfig = function(o) { window.adsbygoogle.push(o); };
-      
-      // Preload the rewarded ad breaks (H5 API requirement)
-      window.adConfig({
-        preloadAdBreaks: 'on',
-        onReady: () => {
-          console.log('[AdManager] AdSense API Ready');
-          this.isAdReady = true;
-        }
-      });
-      
-    } else {
-      // In TEST mode, we consider the ad mechanism ready.
-      console.log('[AdManager] Running in TEST (Mock) mode. No Publisher ID set.');
+  private async initAdSDK() {
+    if (!Capacitor.isNativePlatform()) {
+      console.log('[AdManager] Running in web mode. AdMob SDK is disabled.');
       this.isAdReady = true;
+      return;
+    }
+
+    if (this.isInitializing) return;
+    this.isInitializing = true;
+
+    try {
+      console.log('[AdManager] Initializing AdMob SDK...');
+      await AdMob.initialize({});
+      console.log('[AdManager] AdMob SDK Initialized.');
+      this.isAdReady = true;
+    } catch (e) {
+      console.error('[AdManager] AdMob initialization failed:', e);
+      this.isAdReady = false;
+    } finally {
+      this.isInitializing = false;
     }
   }
 
@@ -70,45 +66,116 @@ export class AdManager {
    * Triggers a rewarded video ad.
    */
   public showRewardedVideo(): Promise<boolean> {
-    return new Promise((resolve) => {
-      const isAdBreakAvailable = this.publisherId && typeof window.adbreak === 'function';
-
-      if (!this.isAdReady || !isAdBreakAvailable) {
-        console.warn('[AdManager] Ad SDK not ready or adbreak missing (Pending Review/AdBlocker). Falling back to Mock.');
+    return new Promise(async (resolve) => {
+      // For web/browsers, use the simulated Mock ad
+      if (!Capacitor.isNativePlatform()) {
+        console.log('[AdManager] Web environment detected. Triggering Mock ad.');
         this.runMockVideoAd(resolve);
         return;
       }
 
-      if (this.publisherId && typeof window.adbreak === 'function') {
-        const adScreen = document.getElementById('mock-ad-screen');
-        if (adScreen) adScreen.style.display = 'flex'; // show a dim overlay while loading
-        
-        window.adbreak({
-          type: 'reward',
-          name: 'premium_saju_reading',
-          beforeAd: () => {
-            // Pause any audio/timers here if we have them
-            console.log('[AdManager] Ad started');
-          },
-          afterAd: () => {
-            // Resume logic
-            if (adScreen) adScreen.style.display = 'none';
-          },
-          adDismissed: () => {
-            console.log('[AdManager] User dismissed ad early.');
-            if (adScreen) adScreen.style.display = 'none';
-            resolve(false);
-          },
-          adViewed: () => {
-            console.log('[AdManager] User watched ad successfully. Reward granted!');
-            if (adScreen) adScreen.style.display = 'none';
-            resolve(true);
-          }
+      // Re-try initialization if it failed earlier
+      if (!this.isAdReady) {
+        await this.initAdSDK();
+      }
+
+      if (!this.isAdReady) {
+        console.warn('[AdManager] AdMob SDK not ready. Falling back to Mock.');
+        this.runMockVideoAd(resolve);
+        return;
+      }
+
+      const adScreen = document.getElementById('mock-ad-screen');
+      const adPlayingText = document.getElementById('ui-ad-playing');
+      const bgMusic = document.getElementById('bg-music') as HTMLAudioElement;
+
+      // Handle background music pause
+      let wasMusicPlaying = false;
+      if (bgMusic && typeof bgMusic.pause === 'function') {
+        wasMusicPlaying = !bgMusic.paused && bgMusic.volume > 0;
+        if (wasMusicPlaying) bgMusic.pause();
+      }
+
+      if (adScreen) {
+        adScreen.style.display = 'flex';
+        adScreen.classList.add('view-active');
+      }
+      if (adPlayingText) {
+        adPlayingText.textContent = 'Loading Ad...';
+      }
+
+      let rewardEarned = false;
+
+      // Listeners definition
+      const rewardedListener = await AdMob.addListener(RewardAdPluginEvents.Rewarded, (reward: AdMobRewardItem) => {
+        console.log('[AdManager] Ad reward earned:', reward);
+        rewardEarned = true;
+      });
+
+      const dismissedListener = await AdMob.addListener(RewardAdPluginEvents.Dismissed, () => {
+        console.log('[AdManager] Ad dismissed by user.');
+        cleanup();
+        if (adScreen) {
+          adScreen.style.display = 'none';
+          adScreen.classList.remove('view-active');
+        }
+        if (wasMusicPlaying && bgMusic) {
+          bgMusic.play().catch(() => {});
+        }
+        resolve(rewardEarned);
+      });
+
+      const failedToLoadListener = await AdMob.addListener(RewardAdPluginEvents.FailedToLoad, (error) => {
+        console.error('[AdManager] Ad failed to load:', error);
+        cleanup();
+        if (adScreen) {
+          adScreen.style.display = 'none';
+          adScreen.classList.remove('view-active');
+        }
+        if (wasMusicPlaying && bgMusic) {
+          bgMusic.play().catch(() => {});
+        }
+        // Fallback to Mock ad
+        this.runMockVideoAd(resolve);
+      });
+
+      const failedToShowListener = await AdMob.addListener(RewardAdPluginEvents.FailedToShow, (error) => {
+        console.error('[AdManager] Ad failed to show:', error);
+        cleanup();
+        if (adScreen) {
+          adScreen.style.display = 'none';
+          adScreen.classList.remove('view-active');
+        }
+        if (wasMusicPlaying && bgMusic) {
+          bgMusic.play().catch(() => {});
+        }
+        // Fallback to Mock ad
+        this.runMockVideoAd(resolve);
+      });
+
+      const cleanup = () => {
+        rewardedListener.remove();
+        dismissedListener.remove();
+        failedToLoadListener.remove();
+        failedToShowListener.remove();
+      };
+
+      try {
+        if (adPlayingText) adPlayingText.textContent = 'Preparing video...';
+        await AdMob.prepareRewardVideoAd({
+          adId: this.adUnitId,
         });
-      } else {
-        // Fallback to MOCK mode if no publisher ID or AdBlocker blocked adbreak
-        if (this.publisherId) {
-           console.warn('[AdManager] AdBreak function missing. AdBlocker active? Falling back to Mock.');
+        if (adPlayingText) adPlayingText.textContent = 'Showing ad...';
+        await AdMob.showRewardVideoAd();
+      } catch (err) {
+        console.error('[AdManager] Error showing native reward ad:', err);
+        cleanup();
+        if (adScreen) {
+          adScreen.style.display = 'none';
+          adScreen.classList.remove('view-active');
+        }
+        if (wasMusicPlaying && bgMusic) {
+          bgMusic.play().catch(() => {});
         }
         this.runMockVideoAd(resolve);
       }
