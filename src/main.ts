@@ -208,7 +208,7 @@ const App = {
             });
             
             console.log('[NativeIAP] Restored purchases:', purchases);
-            const productId = (import.meta as any).env.VITE_PLAY_STORE_SUBSCRIPTION_ID || 'com.dailysaju.premium';
+            const productId = (import.meta as any).env.VITE_PLAY_STORE_SUBSCRIPTION_ID || 'daily_saju_yearly_no_ads';
             const hasActiveSub = purchases.some(p => 
               p.productIdentifier === productId && 
               (p.purchaseState === "1" || p.purchaseState === "0" || p.isActive)
@@ -370,8 +370,8 @@ const App = {
             // Start the native purchase process
             // NOTE: The productIdentifier must match Google Play Console product ID
             // And planIdentifier must match the base plan ID in Google Play Console
-            const productId = (import.meta as any).env.VITE_PLAY_STORE_SUBSCRIPTION_ID || 'com.dailysaju.premium';
-            const basePlanId = (import.meta as any).env.VITE_PLAY_STORE_BASE_PLAN_ID || 'yearly';
+            const productId = (import.meta as any).env.VITE_PLAY_STORE_SUBSCRIPTION_ID || 'daily_saju_yearly_no_ads';
+            const basePlanId = (import.meta as any).env.VITE_PLAY_STORE_BASE_PLAN_ID || 'yearly-ad-free-base';
 
             const result = await NativePurchases.purchaseProduct({
               productIdentifier: productId,

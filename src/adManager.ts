@@ -21,9 +21,8 @@ export class AdManager {
   private isAdReady: boolean = false;
   private isInitializing: boolean = false;
   
-  // Real or Test Ad Unit ID for Android.
-  // Test ID for Android Rewarded: ca-app-pub-3940256099942544/5224354917
-  public adUnitId: string = (import.meta as any).env.VITE_ADMOB_REWARD_ID || 'ca-app-pub-3940256099942544/5224354917';
+  // Real Ad Unit ID for Android.
+  public adUnitId: string = (import.meta as any).env.VITE_ADMOB_REWARD_ID || 'ca-app-pub-5036571902202474/6228955866';
 
   private constructor() {
     this.initAdSDK();
