@@ -80,25 +80,41 @@
           <p class="logo-sub-text" id="ui-landing-logo-sub" style="margin-top: 0; font-size: 0.70rem; letter-spacing: 0.25em; margin-bottom: 0;">DAILY SAJU RITUAL</p>
         </div>
         
-        <h1 class="landing-title" id="ui-landing-title" style="margin-bottom: 0.8rem; font-size: 1.3rem;">Decode Your Destiny</h1>
+        <h1 class="landing-title" id="ui-landing-title" style="margin-bottom: 0.8rem; font-size: 1.3rem;">Korean Four Pillars Reflection</h1>
         
         <div class="landing-intro-text" style="margin-bottom: 0.5rem; font-size: 0.9rem;">
           <p class="landing-saju-intro" id="ui-landing-saju" style="text-align: center; word-break: keep-all; margin-bottom: 1rem;">
-            Saju (四柱), meaning "Four Pillars,"<br>is the ancient Eastern art<br>of reading the unique cosmic energy<br>within you at the moment of your birth.
+            A daily and monthly reflection guide<br>built on a proprietary Korean Saju engine<br>that calculates the Four Pillars from birth data.
           </p>
 
           <p class="landing-saju-intro" id="ui-landing-tojeong" style="text-align: center; word-break: keep-all;">
-            For centuries, Koreans have turned<br>to the profound wisdom of Tojeongbigyeol<br>to navigate life's crossroads,<br>avoid misfortune, and welcome prosperity.<br><br>Now, it is time<br>to unlock the hidden flow of your own life.
+            Review a full sample monthly report first.<br>The app offers short daily guidance for free<br>and deeper long-form reports after rewarded ads.
           </p>
-          
+
+          <div class="review-proof-grid" aria-label="Daily Saju review highlights">
+            <div class="review-proof-card">
+              <span id="ui-proof-engine-title">Own Engine</span>
+              <small id="ui-proof-engine-desc">Four Pillars calculation</small>
+            </div>
+            <div class="review-proof-card">
+              <span id="ui-proof-monthly-title">Monthly Guide</span>
+              <small id="ui-proof-monthly-desc">12 detailed sections</small>
+            </div>
+            <div class="review-proof-card">
+              <span id="ui-proof-free-title">Free Access</span>
+              <small id="ui-proof-free-desc">Rewarded unlocks</small>
+            </div>
+          </div>
           <div class="landing-scroll-space"></div>
         </div>
 
         <!-- Actions Row: compact equal-size buttons -->
-        <div style="display: flex; gap: 0.6rem; width: 82%; max-width: 340px; margin: 1.8rem auto 0;">
+        <div class="landing-actions" style="display: flex; gap: 0.6rem; width: 82%; max-width: 340px; margin: 1.8rem auto 0;">
           <button type="button" id="ui-btn-engine-popup" style="flex: 1; padding: 0.6rem 0.35rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(200,168,79,0.5); color: var(--gold); border-radius: 12px; font-weight: 600; font-size: 0.78rem; cursor: pointer; transition: background 0.2s;">데일리 사주란?</button>
           <button type="button" id="ui-btn-enter" style="flex: 1; padding: 0.6rem 0.35rem; background: var(--gold); border: 1px solid var(--gold); color: #1a1009; border-radius: 12px; font-weight: 700; font-size: 0.78rem; cursor: pointer; transition: opacity 0.2s;"><span id="ui-btn-enter-text">입장하기 →</span></button>
         </div>
+        <button type="button" id="ui-landing-sample-btn" class="landing-sample-btn">Review Monthly Sample</button>
+        <a id="ui-privacy-link" class="privacy-link" href="/privacy.html" target="_blank" rel="noopener">Privacy Policy</a>
       </div>
     </div>
 
@@ -293,7 +309,7 @@
             Premium Report
           </h2>
           <p id="ui-sample-desc" style="font-size: 0.85rem; color: var(--text-2); margin-bottom: 2rem;">
-            Preview of your detailed reading.
+            A reviewer-accessible sample showing the long-form monthly report and proprietary Saju analysis depth.
           </p>
 
           <div id="ui-sample-content" style="text-align: left; margin-bottom: 2rem; width: 100%; max-width: 100%;">
@@ -470,23 +486,6 @@
 
       </div>
 
-      <!-- Mock Ad Screen (with YouTube Shorts) -->
-      <div id="mock-ad-screen" class="screen view-hidden" style="z-index: 9999; background: #000; position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; overflow: hidden;">
-        
-        <!-- Background iframe preloaded to avoid iOS autoplay gesture dropping -->
-        <iframe 
-          id="mock-ad-iframe"
-          src="https://www.youtube.com/embed/NI1fGVggblY?enablejsapi=1&playsinline=1&loop=1&playlist=NI1fGVggblY&controls=0&modestbranding=1"
-          style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; z-index: 1;"
-          allow="autoplay; encrypted-media" 
-          allowfullscreen>
-        </iframe>
-
-        <!-- Hidden Foreground Content (Kept to prevent JS null errors) -->
-        <div style="display: none;">
-          <h3 id="ui-ad-playing">Playing Ad...</h3>
-        </div>
-      </div>
     </div>
     <!-- Engine Bottom Sheet Modal -->
     <div id="engine-modal-overlay" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 9999; opacity: 0; transition: opacity 0.3s; flex-direction: column; justify-content: flex-end;">

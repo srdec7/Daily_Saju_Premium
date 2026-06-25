@@ -104,17 +104,20 @@ body {
   height: auto; /* Allow full height for scrolling */
 }
 
-/* Landing screen must NOT scroll — lock it to viewport height */
+/* Landing stays viewport-sized, but must scroll on short mobile browser viewports. */
 #landing-screen {
   min-height: unset;
   height: 100dvh;
-  overflow: hidden;
-  justify-content: center; /* vertically centre all landing content */
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  justify-content: flex-start;
 }
 #landing-screen.view-active {
   position: fixed; /* take it out of flow so nothing below it creates scroll space */
   top: 0; left: 0; right: 0;
   display: flex;
+  overflow-y: auto;
 }
 
 
@@ -198,8 +201,8 @@ body {
    ===================================== */
 #landing-screen {
   width: 100%;
-  padding-top: calc(env(safe-area-inset-top) + 4rem);
-  padding-bottom: calc(env(safe-area-inset-bottom) + 1rem);
+  padding-top: calc(env(safe-area-inset-top) + 2.65rem);
+  padding-bottom: calc(env(safe-area-inset-bottom) + 2.1rem);
   padding-left: 1.5rem;
   padding-right: 1.5rem;
 }
@@ -212,7 +215,7 @@ body {
   align-items: center;
   z-index: 10;
   flex-shrink: 0;
-  padding-bottom: 0.5rem;
+  padding-bottom: 1.25rem;
   margin: 0 auto;
   text-align: center;
 }
@@ -1518,4 +1521,145 @@ body {
   .monthly-grid {
     grid-template-columns: repeat(3, 1fr);
   }
+}
+
+.review-proof-grid {
+  width: min(100%, 340px);
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.45rem;
+  margin: 1rem auto 0;
+}
+
+.review-proof-card {
+  min-height: 74px;
+  padding: 0.65rem 0.45rem;
+  border: 1px solid rgba(200,168,79,0.28);
+  border-radius: 8px;
+  background: rgba(255,255,255,0.045);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+}
+
+.review-proof-card span {
+  color: var(--gold);
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.review-proof-card small {
+  color: rgba(255,255,255,0.68);
+  font-size: 0.62rem;
+  line-height: 1.25;
+}
+
+.landing-sample-btn {
+  width: 82%;
+  max-width: 340px;
+  margin: 0.7rem auto 0;
+  padding: 0.72rem 0.75rem;
+  border: 1px solid rgba(255,255,255,0.16);
+  border-radius: 8px;
+  background: rgba(255,255,255,0.07);
+  color: rgba(255,255,255,0.92);
+  font-family: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  cursor: pointer;
+}
+
+
+.privacy-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0.7rem auto 0;
+  color: rgba(255,255,255,0.66);
+  font-size: 0.72rem;
+  line-height: 1.2;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.privacy-link:focus-visible {
+  outline: 2px solid rgba(200,168,79,0.75);
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+
+@media (max-height: 820px) {
+  #landing-screen {
+    padding-top: calc(env(safe-area-inset-top) + 2.15rem);
+    padding-bottom: calc(env(safe-area-inset-bottom) + 1.55rem);
+  }
+
+  .logo-block {
+    margin-top: 0.55rem !important;
+    margin-bottom: 0.82rem !important;
+  }
+
+  .logo-block img {
+    width: 194px !important;
+    max-width: 61vw !important;
+  }
+
+  .logo-sub-text {
+    font-size: 0.68rem !important;
+  }
+
+  .landing-title {
+    font-size: 1.2rem !important;
+    margin-bottom: 0.7rem !important;
+  }
+
+  .landing-intro-text {
+    font-size: 0.8rem !important;
+    line-height: 1.58 !important;
+    margin-bottom: 0.35rem !important;
+  }
+
+  .landing-saju-intro {
+    margin-bottom: 0.6rem !important;
+  }
+
+  .review-proof-grid {
+    margin-top: 0.75rem;
+    gap: 0.35rem;
+  }
+
+  .review-proof-card {
+    min-height: 60px;
+    padding: 0.46rem 0.3rem;
+  }
+
+  .review-proof-card span {
+    font-size: 0.66rem;
+  }
+
+  .review-proof-card small {
+    font-size: 0.56rem;
+  }
+
+  .landing-actions {
+    margin-top: 1.2rem !important;
+  }
+
+  .landing-sample-btn {
+    margin-top: 0.7rem;
+    padding: 0.62rem 0.7rem;
+  }
+
+  .privacy-link {
+    margin-top: 0.5rem;
+  }
+}
+@media (max-width: 360px) {
+  .review-proof-card { min-height: 68px; padding: 0.55rem 0.3rem; }
+  .review-proof-card span { font-size: 0.66rem; }
+  .review-proof-card small { font-size: 0.58rem; }
 }

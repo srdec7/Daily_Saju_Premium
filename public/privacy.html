@@ -1,164 +1,96 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Privacy Policy | Daily Saju</title>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700&family=Noto+Serif+KR:wght@200;400;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg: #0a0b10;
-            --card-bg: #14151a;
-            --gold: #c8a84f;
-            --text-main: #e0e0e0;
-            --text-dim: #a0a0a0;
-        }
-        body {
-            background-color: var(--bg);
-            color: var(--text-main);
-            font-family: 'Noto Sans KR', sans-serif;
-            line-height: 1.7;
-            margin: 0;
-            padding: 40px 20px;
-            display: flex;
-            justify-content: center;
-        }
-        .container {
-            max-width: 800px;
-            width: 100%;
-            background: var(--card-bg);
-            padding: 40px;
-            border-radius: 20px;
-            border: 1px solid rgba(200, 168, 79, 0.2);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
-        }
-        h1 {
-            font-family: 'Noto Serif KR', serif;
-            color: var(--gold);
-            font-size: 2rem;
-            margin-bottom: 10px;
-            letter-spacing: -0.02em;
-        }
-        .subtitle {
-            color: var(--text-dim);
-            font-size: 0.9rem;
-            margin-bottom: 40px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            padding-bottom: 20px;
-        }
-        h2 {
-            font-family: 'Noto Serif KR', serif;
-            color: var(--gold);
-            font-size: 1.3rem;
-            margin-top: 30px;
-            margin-bottom: 15px;
-        }
-        p, li {
-            font-size: 0.95rem;
-            color: var(--text-main);
-        }
-        ul {
-            padding-left: 20px;
-        }
-        .footer {
-            margin-top: 50px;
-            padding-top: 20px;
-            border-top: 1px solid rgba(255,255,255,0.1);
-            color: var(--text-dim);
-            font-size: 0.85rem;
-            text-align: center;
-        }
-        @media (max-width: 600px) {
-            .container { padding: 25px; }
-            h1 { font-size: 1.5rem; }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Policy | Daily Saju</title>
+  <style>
+    :root { --bg:#0a0b10; --card:#14151a; --gold:#c8a84f; --text:#e8e8e8; --dim:#a8a8a8; }
+    body { margin:0; padding:40px 20px; background:var(--bg); color:var(--text); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; line-height:1.7; }
+    main { max-width:820px; margin:0 auto; background:var(--card); border:1px solid rgba(200,168,79,.22); border-radius:16px; padding:32px; }
+    h1,h2 { color:var(--gold); line-height:1.25; }
+    h1 { margin-top:0; font-size:2rem; }
+    h2 { margin-top:2rem; font-size:1.2rem; }
+    .updated { color:var(--dim); border-bottom:1px solid rgba(255,255,255,.1); padding-bottom:1rem; margin-bottom:1.5rem; }
+    li { margin:.35rem 0; }
+    .ko { margin-top:3rem; padding-top:2rem; border-top:1px solid rgba(255,255,255,.12); }
+    footer { margin-top:2rem; color:var(--dim); font-size:.9rem; text-align:center; }
+    a { color:var(--gold); text-decoration:underline; text-underline-offset:3px; }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <!-- English Version -->
-        <div id="en">
-            <h1>Privacy Policy</h1>
-            <div class="subtitle">Last Updated: April 15, 2026</div>
+<main>
+  <section>
+    <h1>Privacy Policy</h1>
+    <p class="updated">Last updated: June 25, 2026</p>
+    <p>Daily Saju provides daily and monthly reflection reports based on Korean Four Pillars (Saju) calculations. We respect user privacy and collect only the information needed to provide and maintain the app.</p>
 
-            <p><strong>Daily Saju</strong> (hereinafter referred to as the 'App') respects your privacy and complies with all applicable privacy laws and App Store guidelines.</p>
+    <h2>Information Used for Readings</h2>
+    <ul>
+      <li>Users may enter name, gender, birth date, and optional birth time.</li>
+      <li>This information is used to calculate and display the user's Saju-based daily and monthly report.</li>
+      <li>Birth information is stored locally on the user's device unless the user chooses account or purchase-related features.</li>
+    </ul>
 
-            <h2>1. Information We Collect and Purpose</h2>
-            <p>The App collects the following information to provide fortune-telling and astrology services:</p>
-            <ul>
-                <li><strong>Collected Information</strong>: Name, Gender, Date of Birth, Time of Birth</li>
-                <li><strong>Purpose</strong>: To analyze and provide your Saju (Four Pillars of Destiny) and daily horoscopes based on your birth energy.</li>
-            </ul>
+    <h2>Account, Purchase, and Support Data</h2>
+    <ul>
+      <li>If a user uses account, restore, or premium access features, an email address may be processed through Supabase for authentication and access management.</li>
+      <li>Payments are processed by Apple In-App Purchase, Google Play, Stripe, or the applicable payment platform. Daily Saju does not directly collect or store credit card numbers.</li>
+    </ul>
 
-            <h2>2. Storage and Deletion of Information</h2>
-            <p>The App does not collect information without permission.</p>
-            <ul>
-                <li><strong>Local Storage</strong>: The entered Saju information is stored solely on your local device (localStorage) and is retained until you delete the app or clear the data.</li>
-                <li><strong>Server Transmission</strong>: The App does not send your fortune data to a server; all calculations are processed locally on your device. (However, email information for premium subscription authentication is securely managed via Supabase.)</li>
-            </ul>
+    <h2>Advertising and Tracking</h2>
+    <ul>
+      <li>The app may show rewarded ads through Google AdMob.</li>
+      <li>On iOS, if data is used for tracking or personalized advertising, the app requests permission through Apple's App Tracking Transparency framework before tracking.</li>
+      <li>Users can continue using the app if they decline tracking permission.</li>
+    </ul>
 
-            <h2>3. Payments and Advertising</h2>
-            <ul>
-                <li><strong>Advertising</strong>: The App may use Google AdMob for advertisements. Advertising identifiers may be utilized in this process.</li>
-                <li><strong>Payments</strong>: When making purchases via App Store In-App Purchases or Stripe, transactions are processed according to the secure guidelines of the respective platforms. The App does not collect or store your credit card information directly.</li>
-            </ul>
+    <h2>Data Deletion</h2>
+    <ul>
+      <li>Local reading data can be cleared by resetting app data or deleting the app.</li>
+      <li>For account-related deletion requests, contact us from the registered email address with the subject "Account Deletion Request." We will process verified requests within 48 business hours.</li>
+    </ul>
 
-            <h2>4. User Rights and Data Deletion</h2>
-            <p>You have the right to clear or delete your data at any time via the in-app settings. Additionally, if you have created a premium account (via email authentication) and wish to permanently delete your account and associated data, you can request it as follows:</p>
-            <ul>
-                <li><strong>How to Request Deletion</strong>: Please send an email with the subject "[Account Deletion Request]" from the email address you registered with.</li>
-                <li><strong>Processing Time</strong>: Upon verifying your request, we will permanently destroy the associated account information within 48 hours (business days).</li>
-            </ul>
+    <h2>Contact</h2>
+    <p>Email: <a href="mailto:srdec7@gmail.com">srdec7@gmail.com</a></p>
+  </section>
 
-            <h2>5. Contact Us</h2>
-            <p>If you have any questions regarding this policy, please contact us at:</p>
-            <p>Email: srdec7@gmail.com</p>
-        </div>
+  <section class="ko" lang="ko">
+    <h1>개인정보처리방침</h1>
+    <p class="updated">최종 업데이트: 2026년 6월 25일</p>
+    <p>Daily Saju는 한국 사주(사주팔자) 계산을 기반으로 매일 및 매월의 성찰형 리포트를 제공하는 앱입니다. 앱은 서비스 제공에 필요한 최소한의 정보만 사용합니다.</p>
 
-        <hr style="border-color: rgba(255,255,255,0.1); margin: 60px 0;">
+    <h2>리포트 생성을 위해 사용하는 정보</h2>
+    <ul>
+      <li>사용자는 이름, 성별, 생년월일, 선택 사항인 출생 시간을 입력할 수 있습니다.</li>
+      <li>해당 정보는 사주 기반 일간 및 월간 리포트를 계산하고 표시하기 위해 사용됩니다.</li>
+      <li>출생 정보는 사용자의 기기 안에 로컬로 저장되며, 사용자가 계정 또는 구매 관련 기능을 선택하지 않는 한 리포트 생성을 위해 별도 서버로 판매하거나 공유하지 않습니다.</li>
+    </ul>
 
-        <!-- Korean Version -->
-        <div id="ko">
-            <h1>개인정보처리방침 (Privacy Policy)</h1>
-            <div class="subtitle">마지막 업데이트: 2026. 04. 15</div>
+    <h2>계정, 결제, 고객지원 정보</h2>
+    <ul>
+      <li>계정 인증, 구매 복원, 프리미엄 접근 관리 기능을 사용하는 경우 이메일 주소가 Supabase를 통해 처리될 수 있습니다.</li>
+      <li>결제는 Apple 인앱결제, Google Play, Stripe 또는 해당 결제 플랫폼을 통해 처리됩니다. Daily Saju는 신용카드 번호를 직접 수집하거나 저장하지 않습니다.</li>
+    </ul>
 
-            <p><strong>Daily Saju</strong>(이하 '앱')는 사용자의 개인정보를 소중하게 생각하며, 대한민국의 개인정보보호법 및 애플 앱스토어의 정책을 준수합니다.</p>
+    <h2>광고 및 추적</h2>
+    <ul>
+      <li>앱은 Google AdMob을 통해 보상형 광고를 표시할 수 있습니다.</li>
+      <li>iOS에서 개인화 광고 또는 추적 목적의 데이터 사용이 필요한 경우, 앱은 추적 전에 Apple App Tracking Transparency 권한을 요청합니다.</li>
+      <li>사용자가 추적을 허용하지 않아도 앱의 기본 기능은 계속 사용할 수 있습니다.</li>
+    </ul>
 
-            <h2>1. 수집하는 개인정보 항목 및 목적</h2>
-            <p>앱은 서비스 제공(사주 및 운세 계산)을 위해 다음과 같은 정보를 입력받습니다.</p>
-            <ul>
-                <li><strong>수집 항목</strong>: 이름, 성별, 생년월일, 태어난 시</li>
-                <li><strong>이용 목적</strong>: 사용자의 태어난 기운을 기반으로 한 사주팔자 및 오늘의 운세 결과 분석 및 제공</li>
-            </ul>
+    <h2>데이터 삭제</h2>
+    <ul>
+      <li>기기에 저장된 리포트 관련 데이터는 앱 초기화 또는 앱 삭제를 통해 지울 수 있습니다.</li>
+      <li>계정 관련 데이터 삭제를 원하시면 가입 이메일 주소에서 제목을 "Account Deletion Request"로 하여 문의해 주세요. 확인된 요청은 영업일 기준 48시간 이내 처리합니다.</li>
+    </ul>
 
-            <h2>2. 개인정보의 저장 및 파기</h2>
-            <p>앱은 사용자의 사행성을 조장하거나 무단으로 정보를 수집하지 않습니다.</p>
-            <ul>
-                <li><strong>로컬 저장</strong>: 입력된 사주 정보는 사용자의 기기 내부(localStorage)에만 저장되며, 앱을 삭제하거나 데이터를 초기화할 때까지 유지됩니다.</li>
-                <li><strong>서버 전송</strong>: 앱은 분석을 위해 정보를 서버로 전송하지 않으며, 모든 계산은 기기 내에서 처리됩니다. (단, 프리미엄 결제 인증을 위한 이메일 정보는 예외적으로 Supabase를 통해 안전하게 관리됩니다.)</li>
-            </ul>
+    <h2>문의</h2>
+    <p>이메일: <a href="mailto:srdec7@gmail.com">srdec7@gmail.com</a></p>
+  </section>
 
-            <h2>3. 유료 결제 및 광고</h2>
-            <ul>
-                <li><strong>광고</strong>: 앱은 구글 애드몹(Google AdMob)을 사용하여 광고를 게재할 수 있습니다. 이 과정에서 광고 식별자가 활용될 수 있습니다.</li>
-                <li><strong>결제</strong>: 애플 앱스토어 인앱 결제 혹은 Stripe를 통한 결제 시, 결제 처리는 해당 플랫폼의 보안 가이드라인에 따라 처리되며 앱은 사용자의 카드 정보를 직접 수집하거나 저장하지 않습니다.</li>
-            </ul>
-
-            <h2>4. 사용자의 권리 및 데이터 삭제</h2>
-            <p>사용자는 언제든지 앱 내 설정을 통해 데이터를 초기화하거나 삭제할 수 있는 권리를 가집니다. 또한, 프리미엄 계정(이메일 인증)을 생성한 사용자가 더 이상 서비스를 이용하지 않고 계정 및 관련 데이터를 완전히 삭제하고자 하는 경우, 아래의 방법을 통해 요청하실 수 있습니다.</p>
-            <ul>
-                <li><strong>삭제 요청 방법</strong>: 이메일로 [계정 삭제 요청]이라는 제목과 함께 가입하신 이메일 주소를 보내주시기 바랍니다.</li>
-                <li><strong>처리 기간</strong>: 요청 확인 후 평일 기준 48시간 이내에 해당 계정 정보를 영구 파기합니다.</li>
-            </ul>
-
-            <h2>5. 문의처</h2>
-            <p>본 방침과 관련하여 궁금한 점이 있으시면 아래로 연락해 주시기 바랍니다.</p>
-            <p>이메일: srdec7@gmail.com</p>
-        </div>
-
-        <div class="footer">
-            &copy; 2026 Daily Saju. All rights reserved.
-        </div>
-    </div>
+  <footer>&copy; 2026 Daily Saju. All rights reserved.</footer>
+</main>
 </body>
 </html>

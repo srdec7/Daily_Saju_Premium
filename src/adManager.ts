@@ -19,9 +19,10 @@ declare global {
 export class AdManager {
   private static instance: AdManager;
   private isAdReady: boolean = false;
-  private isInitializing: boolean = false;
+  private initPromise: Promise<void> | null = null;
+  private adMobError: string | null = null;
   
-  // Real Ad Unit ID for Android.
+  // Production ID: ca-app-pub-5036571902202474/6228955866
   public adUnitId: string = (import.meta as any).env.VITE_ADMOB_REWARD_ID || 'ca-app-pub-5036571902202474/6228955866';
 
   private constructor() {
@@ -36,6 +37,26 @@ export class AdManager {
   }
 
   /**
+   * Requests iOS App Tracking Transparency before the ad SDK touches IDFA.
+   * The app continues with non-personalized behavior when permission is denied.
+   */
+  private async requestTrackingAuthorizationIfNeeded() {
+    if (!Capacitor.isNativePlatform() || Capacitor.getPlatform() !== 'ios') return;
+
+    try {
+      const admob = AdMob as any;
+      if (typeof admob.trackingAuthorizationStatus !== 'function' || typeof admob.requestTrackingAuthorization !== 'function') return;
+
+      const info = await admob.trackingAuthorizationStatus();
+      if (info?.status === 'notDetermined') {
+        await admob.requestTrackingAuthorization();
+      }
+    } catch (e) {
+      console.warn('[AdManager] ATT request skipped or failed:', e);
+    }
+  }
+
+  /**
    * Initializes the Google AdMob SDK
    */
   private async initAdSDK() {
@@ -45,20 +66,25 @@ export class AdManager {
       return;
     }
 
-    if (this.isInitializing) return;
-    this.isInitializing = true;
-
-    try {
-      console.log('[AdManager] Initializing AdMob SDK...');
-      await AdMob.initialize({});
-      console.log('[AdManager] AdMob SDK Initialized.');
-      this.isAdReady = true;
-    } catch (e) {
-      console.error('[AdManager] AdMob initialization failed:', e);
-      this.isAdReady = false;
-    } finally {
-      this.isInitializing = false;
+    if (this.initPromise) {
+      return this.initPromise;
     }
+
+    this.initPromise = (async () => {
+      try {
+        console.log('[AdManager] Initializing AdMob SDK...');
+        await this.requestTrackingAuthorizationIfNeeded();
+        await AdMob.initialize({});
+        console.log('[AdManager] AdMob SDK Initialized.');
+        this.isAdReady = true;
+        this.adMobError = null;
+      } catch (e: any) {
+        console.error('[AdManager] AdMob initialization failed:', e);
+        this.isAdReady = false;
+        this.adMobError = e.message || String(e);
+      }
+    })();
+    return this.initPromise;
   }
 
   /**
@@ -66,10 +92,9 @@ export class AdManager {
    */
   public showRewardedVideo(): Promise<boolean> {
     return new Promise(async (resolve) => {
-      // For web/browsers, use the simulated Mock ad
       if (!Capacitor.isNativePlatform()) {
-        console.log('[AdManager] Web environment detected. Triggering Mock ad.');
-        this.runMockVideoAd(resolve);
+        alert('Ads are not supported on the Web version. Please use the mobile app.');
+        resolve(false);
         return;
       }
 
@@ -79,13 +104,12 @@ export class AdManager {
       }
 
       if (!this.isAdReady) {
-        console.warn('[AdManager] AdMob SDK not ready. Falling back to Mock.');
-        this.runMockVideoAd(resolve);
+        console.warn('[AdManager] AdMob SDK not ready.');
+        alert('AdMob SDK not ready. Error: ' + (this.adMobError || 'Unknown'));
+        resolve(false);
         return;
       }
 
-      const adScreen = document.getElementById('mock-ad-screen');
-      const adPlayingText = document.getElementById('ui-ad-playing');
       const bgMusic = document.getElementById('bg-music') as HTMLAudioElement;
 
       // Handle background music pause
@@ -93,14 +117,6 @@ export class AdManager {
       if (bgMusic && typeof bgMusic.pause === 'function') {
         wasMusicPlaying = !bgMusic.paused && bgMusic.volume > 0;
         if (wasMusicPlaying) bgMusic.pause();
-      }
-
-      if (adScreen) {
-        adScreen.style.display = 'flex';
-        adScreen.classList.add('view-active');
-      }
-      if (adPlayingText) {
-        adPlayingText.textContent = 'Loading Ad...';
       }
 
       let rewardEarned = false;
@@ -114,10 +130,6 @@ export class AdManager {
       const dismissedListener = await AdMob.addListener(RewardAdPluginEvents.Dismissed, () => {
         console.log('[AdManager] Ad dismissed by user.');
         cleanup();
-        if (adScreen) {
-          adScreen.style.display = 'none';
-          adScreen.classList.remove('view-active');
-        }
         if (wasMusicPlaying && bgMusic) {
           bgMusic.play().catch(() => {});
         }
@@ -127,29 +139,21 @@ export class AdManager {
       const failedToLoadListener = await AdMob.addListener(RewardAdPluginEvents.FailedToLoad, (error) => {
         console.error('[AdManager] Ad failed to load:', error);
         cleanup();
-        if (adScreen) {
-          adScreen.style.display = 'none';
-          adScreen.classList.remove('view-active');
-        }
         if (wasMusicPlaying && bgMusic) {
           bgMusic.play().catch(() => {});
         }
-        // Fallback to Mock ad
-        this.runMockVideoAd(resolve);
+        alert('Ad failed to load (No Fill or Error). Please try again later.');
+        resolve(false);
       });
 
       const failedToShowListener = await AdMob.addListener(RewardAdPluginEvents.FailedToShow, (error) => {
         console.error('[AdManager] Ad failed to show:', error);
         cleanup();
-        if (adScreen) {
-          adScreen.style.display = 'none';
-          adScreen.classList.remove('view-active');
-        }
         if (wasMusicPlaying && bgMusic) {
           bgMusic.play().catch(() => {});
         }
-        // Fallback to Mock ad
-        this.runMockVideoAd(resolve);
+        alert('Ad failed to show. Please try again later.');
+        resolve(false);
       });
 
       const cleanup = () => {
@@ -160,83 +164,21 @@ export class AdManager {
       };
 
       try {
-        if (adPlayingText) adPlayingText.textContent = 'Preparing video...';
         await AdMob.prepareRewardVideoAd({
           adId: this.adUnitId,
         });
-        if (adPlayingText) adPlayingText.textContent = 'Showing ad...';
         await AdMob.showRewardVideoAd();
       } catch (err) {
         console.error('[AdManager] Error showing native reward ad:', err);
         cleanup();
-        if (adScreen) {
-          adScreen.style.display = 'none';
-          adScreen.classList.remove('view-active');
-        }
         if (wasMusicPlaying && bgMusic) {
           bgMusic.play().catch(() => {});
         }
-        this.runMockVideoAd(resolve);
+        alert('Error preparing or showing native reward ad.');
+        resolve(false);
       }
     });
   }
 
-  private runMockVideoAd(onComplete: (success: boolean) => void) {
-    const adScreen = document.getElementById('mock-ad-screen');
-    const adPlayingText = document.getElementById('ui-ad-playing');
-    const adIframe = document.getElementById('mock-ad-iframe') as HTMLIFrameElement;
-    const bgMusic = document.getElementById('bg-music') as HTMLAudioElement;
-    
-    // Check if music was actively playing
-    let wasMusicPlaying = false;
-    if (bgMusic && typeof bgMusic.pause === 'function') {
-      wasMusicPlaying = !bgMusic.paused && bgMusic.volume > 0;
-      if (wasMusicPlaying) bgMusic.pause();
-    }
 
-    if (!adScreen) {
-      if (wasMusicPlaying && bgMusic) bgMusic.play().catch(() => {});
-      onComplete(false);
-      return;
-    }
-
-    adScreen.classList.add('view-active');
-    adScreen.style.display = 'flex';
-    
-    // Play video by sending JS API message to pre-loaded iframe (keeps gesture sync on iOS)
-    if (adIframe && adIframe.contentWindow) {
-      adIframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
-    }
-
-    let countdown = 21;
-    if (adPlayingText) adPlayingText.textContent = `Playing Partner Message... ${countdown}s`;
-
-    const interval = setInterval(() => {
-      countdown -= 1;
-      if (adPlayingText) adPlayingText.textContent = `Playing Partner Message... ${countdown}s`;
-      
-      if (countdown <= 0) {
-        clearInterval(interval);
-        if (adPlayingText) adPlayingText.textContent = 'Reward Granted!';
-        
-        setTimeout(() => {
-          adScreen.classList.remove('view-active');
-          adScreen.style.display = 'none';
-          if (adIframe && adIframe.contentWindow) {
-             // Stop the video
-             adIframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
-             // Rewind it for next time
-             adIframe.contentWindow.postMessage('{"event":"command","func":"seekTo","args":[0, true]}', '*');
-          }
-
-          // Resume background music if it was playing
-          if (wasMusicPlaying && bgMusic) {
-             bgMusic.play().catch(() => console.warn('Audio resume blocked'));
-          }
-
-          onComplete(true);
-        }, 800);
-      }
-    }, 1000);
-  }
 }

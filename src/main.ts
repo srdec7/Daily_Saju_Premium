@@ -373,11 +373,18 @@ const App = {
             const productId = (import.meta as any).env.VITE_PLAY_STORE_SUBSCRIPTION_ID || 'daily_saju_yearly_no_ads';
             const basePlanId = (import.meta as any).env.VITE_PLAY_STORE_BASE_PLAN_ID || 'yearly-ad-free-base';
 
-            const result = await NativePurchases.purchaseProduct({
-              productIdentifier: productId,
-              planIdentifier: basePlanId,
-              productType: PURCHASE_TYPE.SUBS,
-            });
+            const timeoutPromise = new Promise<any>((_, reject) => 
+              setTimeout(() => reject(new Error('timeout')), 10000)
+            );
+
+            const result = await Promise.race([
+              NativePurchases.purchaseProduct({
+                productIdentifier: productId,
+                planIdentifier: basePlanId,
+                productType: PURCHASE_TYPE.SUBS,
+              }),
+              timeoutPromise
+            ]);
 
             console.log('[NativeIAP] Purchase result:', result);
             
@@ -451,13 +458,14 @@ const App = {
 
     // Sample Screen logic
     const viewSampleBtn = document.getElementById('ui-view-sample-btn');
+    const landingSampleBtn = document.getElementById('ui-landing-sample-btn');
     const closeSampleBtn = document.getElementById('ui-close-sample-btn');
     
     // Legacy single openSample (uses selected paywall plan, or falls back to user's stored plan)
-    const openSample = () => {
+    const openSample = (preferredType?: 'standard' | 'premium') => {
       const selectedPlan = document.querySelector('input[name="plan"]:checked') as HTMLInputElement;
       // If on the paywall screen, use the selected radio; otherwise use the stored user plan (default: standard)
-      const type = selectedPlan ? selectedPlan.value : (localStorage.getItem('saju_premium_plan') || 'standard');
+      const type = preferredType || (selectedPlan ? selectedPlan.value : (localStorage.getItem('saju_premium_plan') || 'standard'));
       
       const stdSpan = document.getElementById('sample-content-standard');
       const premSpan = document.getElementById('sample-content-premium');
@@ -466,9 +474,9 @@ const App = {
 
       const titleEl = document.getElementById('ui-sample-title');
       if (titleEl) {
-        const lang = this.elements.langToggleBtn.getAttribute('data-lang') as LanguageCode || 'en';
-        const ui = uiTranslations[lang] || uiTranslations['en'];
-        titleEl.textContent = type === 'standard' ? ui.sampleTitleStandard : ui.sampleTitlePremium;
+        titleEl.textContent = (this.elements.langToggleBtn.getAttribute('data-lang') as LanguageCode || 'en') === 'ko'
+          ? (type === 'standard' ? '스탠다드 리포트 샘플' : '프리미엄 월간 리포트 샘플')
+          : (type === 'standard' ? 'Standard Report Sample' : 'Review Sample: Premium Monthly Report');
       }
 
       if (this.screens.sample) {
@@ -477,7 +485,8 @@ const App = {
       }
     };
     
-    if (viewSampleBtn) viewSampleBtn.addEventListener('click', openSample);
+    if (viewSampleBtn) viewSampleBtn.addEventListener('click', () => openSample());
+    if (landingSampleBtn) landingSampleBtn.addEventListener('click', () => openSample('premium'));
 
     // New Dual Sample approach for Teaser Actions
     const sampleBtns = document.querySelectorAll('.ui-sample-btn');
@@ -499,9 +508,9 @@ const App = {
         // Update dynamic title for teaser buttons
         const titleEl = document.getElementById('ui-sample-title');
         if (titleEl) {
-          const lang = this.elements.langToggleBtn.getAttribute('data-lang') as LanguageCode || 'en';
-          const ui = uiTranslations[lang] || uiTranslations['en'];
-          titleEl.textContent = type === 'standard' ? ui.sampleTitleStandard : ui.sampleTitlePremium;
+          titleEl.textContent = (this.elements.langToggleBtn.getAttribute('data-lang') as LanguageCode || 'en') === 'ko'
+          ? (type === 'standard' ? '스탠다드 리포트 샘플' : '프리미엄 월간 리포트 샘플')
+          : (type === 'standard' ? 'Standard Report Sample' : 'Review Sample: Premium Monthly Report');
         }
 
         if (this.screens.sample) {
@@ -758,6 +767,31 @@ const App = {
     tx('ui-landing-logo-sub', ui.logoSub);
     el('ui-landing-saju', ui.landingSajuIntro);
     el('ui-landing-tojeong', ui.landingTojeongIntro);
+    if (lang === 'ko') {
+      tx('ui-landing-title', '한국 사주 기반 월간 리포트');
+      el('ui-landing-saju', '자체 사주 엔진이 생년월일과 출생 시간을 바탕으로<br>사주팔자의 네 기둥을 계산하고 해석합니다.');
+      el('ui-landing-tojeong', '무료 일간 안내와 함께,<br>광고 보상 후 깊이 있는 연간/월간 리포트를 확인할 수 있습니다.<br>먼저 월간 샘플을 열어 콘텐츠 깊이를 확인해 보세요.');
+      tx('ui-proof-engine-title', '자체 엔진');
+      tx('ui-proof-engine-desc', '사주팔자 계산');
+      tx('ui-proof-monthly-title', '월간 리포트');
+      tx('ui-proof-monthly-desc', '12개월 상세 안내');
+      tx('ui-proof-free-title', '무료 이용');
+      tx('ui-proof-free-desc', '광고 보상 열람');
+      tx('ui-landing-sample-btn', '월간 샘플 보기');
+      tx('ui-privacy-link', '개인정보처리방침');
+    } else {
+      tx('ui-landing-title', 'Korean Four Pillars Reflection');
+      el('ui-landing-saju', 'A daily and monthly reflection guide<br>built on a proprietary Korean Saju engine<br>that calculates the Four Pillars from birth data.');
+      el('ui-landing-tojeong', 'Review a full sample monthly report first.<br>The app offers short daily guidance for free<br>and deeper long-form reports after rewarded ads.');
+      tx('ui-proof-engine-title', 'Own Engine');
+      tx('ui-proof-engine-desc', 'Four Pillars calculation');
+      tx('ui-proof-monthly-title', 'Monthly Guide');
+      tx('ui-proof-monthly-desc', '12 detailed sections');
+      tx('ui-proof-free-title', 'Free Access');
+      tx('ui-proof-free-desc', 'Rewarded unlocks');
+      tx('ui-landing-sample-btn', 'Review Monthly Sample');
+      tx('ui-privacy-link', 'Privacy Policy');
+    }
     if (this.elements.btnReset) this.elements.btnReset.textContent = ui.btnReset;
     const fabHome = document.getElementById('ui-fab-home');
     if (fabHome) fabHome.innerHTML = `↩ ${ui.btnReset}`;
